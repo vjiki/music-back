@@ -1,25 +1,34 @@
-# Use a lightweight JDK 25 image
-FROM eclipse-temurin:25-jdk-jammy
+# Use lightweight JDK 25 image
+FROM eclipse-temurin:25-jdk-jammy AS builder
 
-# Set working directory
 WORKDIR /app
 
-# Copy Gradle wrapper and build files
+# Copy Gradle wrapper and config files
 COPY gradlew ./
 COPY gradle gradle
 COPY build.gradle.kts settings.gradle.kts ./
 
-# Download dependencies (for caching)
+# Pre-fetch dependencies (optional but speeds up build)
 RUN ./gradlew dependencies --no-daemon || true
 
-# Copy the rest of the source
+# Copy source
 COPY . .
 
-# Build the app
+# Build the JAR
 RUN ./gradlew clean build -x test --no-daemon
 
-# Expose the port your app runs on (change if needed)
+# =========================
+# Run stage
+# =========================
+FROM eclipse-temurin:25-jre-jammy
+
+WORKDIR /app
+
+# Copy built JAR from previous stage
+COPY --from=builder /app/build/libs/*.jar app.jar
+
+# Expose port (Spring Boot default)
 EXPOSE 8080
 
-# Run the Spring Boot JAR
-CMD ["java", "-jar", "build/libs/app.jar"]
+# Run the app
+ENTRYPOINT ["java", "-jar", "app.jar"]
