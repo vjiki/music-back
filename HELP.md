@@ -1,18 +1,13 @@
-# Read Me First
-The following was discovered as part of building this project:
-
-* The JVM level was changed from '25' to '21' as the Kotlin version does not support Java 25 yet.
-
 # Getting Started
 
 ### Reference Documentation
 For further reference, please consider the following sections:
 
 * [Official Gradle documentation](https://docs.gradle.org)
-* [Spring Boot Gradle Plugin Reference Guide](https://docs.spring.io/spring-boot/3.5.7/gradle-plugin)
-* [Create an OCI image](https://docs.spring.io/spring-boot/3.5.7/gradle-plugin/packaging-oci-image.html)
-* [Spring Web](https://docs.spring.io/spring-boot/3.5.7/reference/web/servlet.html)
-* [Spring for GraphQL](https://docs.spring.io/spring-boot/3.5.7/reference/web/spring-graphql.html)
+* [Spring Boot Gradle Plugin Reference Guide](https://docs.spring.io/spring-boot/3.5.8-SNAPSHOT/gradle-plugin)
+* [Create an OCI image](https://docs.spring.io/spring-boot/3.5.8-SNAPSHOT/gradle-plugin/packaging-oci-image.html)
+* [Spring Web](https://docs.spring.io/spring-boot/3.5.8-SNAPSHOT/reference/web/servlet.html)
+* [Spring for GraphQL](https://docs.spring.io/spring-boot/3.5.8-SNAPSHOT/reference/web/spring-graphql.html)
 
 ### Guides
 The following guides illustrate how to use some features concretely:
