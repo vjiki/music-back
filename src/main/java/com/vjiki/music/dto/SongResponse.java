@@ -17,7 +17,5 @@ public class SongResponse {
     
     private String cover;
     private String title;
-    private Boolean isFavourite;
-    private Boolean isDisliked;
 }
 

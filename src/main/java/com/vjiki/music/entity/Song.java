@@ -41,11 +41,13 @@ public class Song {
     @Column(name = "title", nullable = false)
     private String title;
 
-    @Column(name = "is_favourite")
-    private Boolean isFavourite;
+    @Column(name = "likes_count")
+    @Builder.Default
+    private Long likesCount = 0L;
 
-    @Column(name = "is_disliked")
-    private Boolean isDisliked;
+    @Column(name = "dislikes_count")
+    @Builder.Default
+    private Long dislikesCount = 0L;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

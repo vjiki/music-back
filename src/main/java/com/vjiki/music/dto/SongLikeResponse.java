@@ -1,0 +1,16 @@
+package com.vjiki.music.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class SongLikeResponse {
+    private Boolean isLiked;
+    private Boolean isDisliked;
+    private Long likesCount;
+    private Long dislikesCount;
+}
+

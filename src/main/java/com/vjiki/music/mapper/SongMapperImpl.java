@@ -21,9 +21,7 @@ public class SongMapperImpl implements SongMapper {
                 extractArtist(song.getArtists()),
                 extractUrl(song.getAudioUrls()),
                 extractUrl(song.getCoverUrls()),
-                song.getTitle(),
-                Optional.ofNullable(song.getIsFavourite()).orElse(false),
-                Optional.ofNullable(song.getIsDisliked()).orElse(false)
+                song.getTitle()
         );
     }
 
