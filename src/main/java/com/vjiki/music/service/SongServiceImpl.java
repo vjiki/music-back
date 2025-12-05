@@ -20,7 +20,7 @@ public class SongServiceImpl implements SongService {
 
     @Override
     public List<SongResponse> getSongs(String userId) {
-        return songRepository.findAll().stream()
+        return songRepository.findAllActive().stream()
                 .map(songMapper::toResponse)
                 .toList();
     }

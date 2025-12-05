@@ -14,10 +14,10 @@ import java.util.UUID;
 @Repository
 public interface PlaylistSongRepository extends JpaRepository<PlaylistSong, UUID> {
 
-    @Query("SELECT ps FROM PlaylistSong ps LEFT JOIN FETCH ps.song LEFT JOIN FETCH ps.playlist WHERE ps.playlist.id = :playlistId ORDER BY ps.position ASC, ps.addedAt ASC")
+    @Query("SELECT ps FROM PlaylistSong ps LEFT JOIN FETCH ps.song LEFT JOIN FETCH ps.playlist WHERE ps.playlist.id = :playlistId AND ps.song.active = true ORDER BY ps.position ASC, ps.addedAt ASC")
     List<PlaylistSong> findByPlaylistId(@Param("playlistId") UUID playlistId);
 
-    @Query("SELECT ps FROM PlaylistSong ps LEFT JOIN FETCH ps.song WHERE ps.playlist.id = :playlistId ORDER BY ps.position ASC, ps.addedAt ASC")
+    @Query("SELECT ps FROM PlaylistSong ps LEFT JOIN FETCH ps.song WHERE ps.playlist.id = :playlistId AND ps.song.active = true ORDER BY ps.position ASC, ps.addedAt ASC")
     List<PlaylistSong> findByPlaylistIdWithSong(@Param("playlistId") UUID playlistId);
 
     @Query("SELECT ps FROM PlaylistSong ps WHERE ps.playlist.id = :playlistId AND ps.song.id = :songId")

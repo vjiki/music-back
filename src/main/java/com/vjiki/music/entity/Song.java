@@ -66,5 +66,9 @@ public class Song {
     @Version
     @Column(name = "version", nullable = false)
     private Integer version;
+
+    @Column(name = "active", nullable = false)
+    @Builder.Default
+    private Boolean active = false;
 }
 
