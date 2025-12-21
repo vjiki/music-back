@@ -13,19 +13,36 @@ import io.kotest.matchers.shouldNotBe
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.security.crypto.password.PasswordEncoder
-import org.springframework.test.context.ContextConfiguration
+import org.springframework.test.context.DynamicPropertyRegistry
+import org.springframework.test.context.DynamicPropertySource
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
 
 @SpringBootTest
-@ContextConfiguration(classes = [TestContainersConfig::class])
 @Transactional
 open class UserServiceIntegrationTest : DescribeSpec() {
+
+    companion object {
+        @JvmStatic
+        @DynamicPropertySource
+        fun configureProperties(registry: DynamicPropertyRegistry) {
+            val container = TestContainersConfig.postgresContainer
+            registry.add("spring.datasource.url") { container.jdbcUrl }
+            registry.add("spring.datasource.username") { container.username }
+            registry.add("spring.datasource.password") { container.password }
+            registry.add("spring.datasource.driver-class-name") { "org.postgresql.Driver" }
+            registry.add("spring.jpa.hibernate.ddl-auto") { "create-drop" }
+            registry.add("spring.jpa.properties.hibernate.default_schema") { "music" }
+            registry.add("spring.jpa.show-sql") { "false" }
+            registry.add("spring.jpa.properties.hibernate.dialect") { "org.hibernate.dialect.PostgreSQLDialect" }
+            registry.add("spring.jpa.properties.hibernate.jdbc.lob.non_contextual_creation") { "true" }
+        }
+    }
 
     override fun extensions() = listOf(SpringExtension)
 
     @Autowired
-    lateinit var userService: UserService
+    lateinit var userService: UserServiceImpl
 
     @Autowired
     lateinit var userRepository: UserRepository

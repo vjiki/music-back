@@ -53,15 +53,26 @@ class SongLikeServiceTest : DescribeSpec({
         )
 
         it("should like a song when not already liked") {
+            val playlistId = UUID.randomUUID()
+            val playlist = Playlist(
+                id = playlistId,
+                user = user,
+                name = "DEFAULT_LIKES",
+                type = "DEFAULT",
+                isPublic = false,
+                createdBy = "system",
+                modifiedBy = "system"
+            )
+
             every { likeRepository.existsByUserIdAndSongIdAndRevokedAtIsNull(userId, songId) } returns false
             every { dislikeRepository.findByUserIdAndSongIdAndRevokedAtIsNull(userId, songId) } returns Optional.empty()
             every { userRepository.findById(userId) } returns Optional.of(user)
             every { songRepository.findById(songId) } returns Optional.of(song)
             every { likeRepository.save(any()) } returns mockk()
             every { playlistRepository.findByUserIdAndName(userId, "DEFAULT_LIKES") } returns Optional.empty()
-            every { playlistRepository.save(any()) } returns mockk()
-            every { playlistSongRepository.findByPlaylistIdAndSongId(any(), songId) } returns Optional.empty()
-            every { playlistSongRepository.findByPlaylistIdWithSong(any()) } returns emptyList()
+            every { playlistRepository.save(any()) } returns playlist
+            every { playlistSongRepository.findByPlaylistIdAndSongId(playlistId, songId) } returns Optional.empty()
+            every { playlistSongRepository.findByPlaylistIdWithSong(playlistId) } returns emptyList()
             every { playlistSongRepository.save(any()) } returns mockk()
             every { likeRepository.countBySongIdAndRevokedAtIsNull(songId) } returns 1L
             every { dislikeRepository.countBySongIdAndRevokedAtIsNull(songId) } returns 0L
@@ -74,11 +85,14 @@ class SongLikeServiceTest : DescribeSpec({
         }
 
         it("should not like if already liked") {
+            clearMocks(likeRepository, dislikeRepository, userRepository, songRepository, playlistRepository, playlistSongRepository)
             every { likeRepository.existsByUserIdAndSongIdAndRevokedAtIsNull(userId, songId) } returns true
 
             songLikeService.likeSong(userId, songId)
 
             verify(exactly = 0) { likeRepository.save(any()) }
+            verify(exactly = 0) { userRepository.findById(any()) }
+            verify(exactly = 0) { songRepository.findById(any()) }
         }
 
         it("should revoke dislike when liking") {
@@ -87,19 +101,39 @@ class SongLikeServiceTest : DescribeSpec({
                 song = song,
                 createdBy = "system"
             )
+            val dislikesPlaylistId = UUID.randomUUID()
+            val dislikesPlaylist = Playlist(
+                id = dislikesPlaylistId,
+                user = user,
+                name = "DEFAULT_DISLIKES",
+                type = "DEFAULT",
+                isPublic = false,
+                createdBy = "system",
+                modifiedBy = "system"
+            )
+            val likesPlaylistId = UUID.randomUUID()
+            val likesPlaylist = Playlist(
+                id = likesPlaylistId,
+                user = user,
+                name = "DEFAULT_LIKES",
+                type = "DEFAULT",
+                isPublic = false,
+                createdBy = "system",
+                modifiedBy = "system"
+            )
 
             every { likeRepository.existsByUserIdAndSongIdAndRevokedAtIsNull(userId, songId) } returns false
             every { dislikeRepository.findByUserIdAndSongIdAndRevokedAtIsNull(userId, songId) } returns Optional.of(dislike)
             every { dislikeRepository.save(any()) } returns dislike
-            every { playlistRepository.findByUserIdAndName(userId, "DEFAULT_DISLIKES") } returns Optional.of(mockk())
-            every { playlistSongRepository.deleteByPlaylistIdAndSongId(any(), songId) } just Runs
+            every { playlistRepository.findByUserIdAndName(userId, "DEFAULT_DISLIKES") } returns Optional.of(dislikesPlaylist)
+            every { playlistSongRepository.deleteByPlaylistIdAndSongId(dislikesPlaylistId, songId) } just Runs
             every { userRepository.findById(userId) } returns Optional.of(user)
             every { songRepository.findById(songId) } returns Optional.of(song)
             every { likeRepository.save(any()) } returns mockk()
             every { playlistRepository.findByUserIdAndName(userId, "DEFAULT_LIKES") } returns Optional.empty()
-            every { playlistRepository.save(any()) } returns mockk()
-            every { playlistSongRepository.findByPlaylistIdAndSongId(any(), songId) } returns Optional.empty()
-            every { playlistSongRepository.findByPlaylistIdWithSong(any()) } returns emptyList()
+            every { playlistRepository.save(any()) } returns likesPlaylist
+            every { playlistSongRepository.findByPlaylistIdAndSongId(likesPlaylistId, songId) } returns Optional.empty()
+            every { playlistSongRepository.findByPlaylistIdWithSong(likesPlaylistId) } returns emptyList()
             every { playlistSongRepository.save(any()) } returns mockk()
             every { likeRepository.countBySongIdAndRevokedAtIsNull(songId) } returns 1L
             every { dislikeRepository.countBySongIdAndRevokedAtIsNull(songId) } returns 0L
@@ -137,15 +171,27 @@ class SongLikeServiceTest : DescribeSpec({
         )
 
         it("should dislike a song when not already disliked") {
+            clearMocks(likeRepository, dislikeRepository, userRepository, songRepository, playlistRepository, playlistSongRepository)
+            val playlistId = UUID.randomUUID()
+            val playlist = Playlist(
+                id = playlistId,
+                user = user,
+                name = "DEFAULT_DISLIKES",
+                type = "DEFAULT",
+                isPublic = false,
+                createdBy = "system",
+                modifiedBy = "system"
+            )
+
             every { dislikeRepository.existsByUserIdAndSongIdAndRevokedAtIsNull(userId, songId) } returns false
             every { likeRepository.findByUserIdAndSongIdAndRevokedAtIsNull(userId, songId) } returns Optional.empty()
             every { userRepository.findById(userId) } returns Optional.of(user)
             every { songRepository.findById(songId) } returns Optional.of(song)
             every { dislikeRepository.save(any()) } returns mockk()
             every { playlistRepository.findByUserIdAndName(userId, "DEFAULT_DISLIKES") } returns Optional.empty()
-            every { playlistRepository.save(any()) } returns mockk()
-            every { playlistSongRepository.findByPlaylistIdAndSongId(any(), songId) } returns Optional.empty()
-            every { playlistSongRepository.findByPlaylistIdWithSong(any()) } returns emptyList()
+            every { playlistRepository.save(any()) } returns playlist
+            every { playlistSongRepository.findByPlaylistIdAndSongId(playlistId, songId) } returns Optional.empty()
+            every { playlistSongRepository.findByPlaylistIdWithSong(playlistId) } returns emptyList()
             every { playlistSongRepository.save(any()) } returns mockk()
             every { likeRepository.countBySongIdAndRevokedAtIsNull(songId) } returns 0L
             every { dislikeRepository.countBySongIdAndRevokedAtIsNull(songId) } returns 1L
@@ -158,11 +204,14 @@ class SongLikeServiceTest : DescribeSpec({
         }
 
         it("should not dislike if already disliked") {
+            clearMocks(likeRepository, dislikeRepository, userRepository, songRepository, playlistRepository, playlistSongRepository)
             every { dislikeRepository.existsByUserIdAndSongIdAndRevokedAtIsNull(userId, songId) } returns true
 
             songLikeService.dislikeSong(userId, songId)
 
             verify(exactly = 0) { dislikeRepository.save(any()) }
+            verify(exactly = 0) { userRepository.findById(any()) }
+            verify(exactly = 0) { songRepository.findById(any()) }
         }
     }
 

@@ -18,6 +18,19 @@ class ChatServiceTest : DescribeSpec({
     val chatParticipantRepository = mockk<ChatParticipantRepository>()
     val chatService = ChatServiceImpl(chatRepository, chatParticipantRepository)
 
+    fun createTestUser(email: String, nickname: String): User {
+        return User(
+            email = email,
+            nickname = nickname,
+            accessLevel = AccessLevel.USER,
+            provider = AuthProvider.LOCAL,
+            isActive = true,
+            isVerified = false,
+            createdBy = "system",
+            modifiedBy = "system"
+        )
+    }
+
     describe("getChatsByUserId") {
         it("should return chats for user") {
             val userId = UUID.randomUUID()
@@ -26,11 +39,12 @@ class ChatServiceTest : DescribeSpec({
                 id = chatId,
                 type = ChatType.DIRECT
             )
+            val user = createTestUser("test@example.com", "testuser")
             val participant = ChatParticipant(
                 chatId = chatId,
                 userId = userId,
                 chat = chat,
-                user = mockk(),
+                user = user,
                 role = ParticipantRole.MEMBER,
                 isMuted = false
             )

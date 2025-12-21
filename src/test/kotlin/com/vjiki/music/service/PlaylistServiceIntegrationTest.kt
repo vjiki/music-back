@@ -13,19 +13,36 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.ContextConfiguration
+import org.springframework.test.context.DynamicPropertyRegistry
+import org.springframework.test.context.DynamicPropertySource
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
 
 @SpringBootTest
-@ContextConfiguration(classes = [TestContainersConfig::class])
 @Transactional
 open class PlaylistServiceIntegrationTest : DescribeSpec() {
+
+    companion object {
+        @JvmStatic
+        @DynamicPropertySource
+        fun configureProperties(registry: DynamicPropertyRegistry) {
+            val container = TestContainersConfig.postgresContainer
+            registry.add("spring.datasource.url") { container.jdbcUrl }
+            registry.add("spring.datasource.username") { container.username }
+            registry.add("spring.datasource.password") { container.password }
+            registry.add("spring.datasource.driver-class-name") { "org.postgresql.Driver" }
+            registry.add("spring.jpa.hibernate.ddl-auto") { "create-drop" }
+            registry.add("spring.jpa.properties.hibernate.default_schema") { "music" }
+            registry.add("spring.jpa.show-sql") { "false" }
+            registry.add("spring.jpa.properties.hibernate.dialect") { "org.hibernate.dialect.PostgreSQLDialect" }
+            registry.add("spring.jpa.properties.hibernate.jdbc.lob.non_contextual_creation") { "true" }
+        }
+    }
 
     override fun extensions() = listOf(SpringExtension)
 
     @Autowired
-    lateinit var playlistService: PlaylistService
+    lateinit var playlistService: PlaylistServiceImpl
 
     @Autowired
     lateinit var playlistRepository: PlaylistRepository
@@ -34,31 +51,33 @@ open class PlaylistServiceIntegrationTest : DescribeSpec() {
     lateinit var userRepository: UserRepository
 
     fun createTestUser(): User {
-        return userRepository.save(
-            User(
-                email = "playlistuser${UUID.randomUUID()}@example.com",
-                nickname = "playlistuser",
-                accessLevel = AccessLevel.USER,
-                provider = AuthProvider.LOCAL,
-                isActive = true,
-                isVerified = false,
-                createdBy = "system",
-                modifiedBy = "system"
-            )
+        val user = User(
+            email = "playlistuser${UUID.randomUUID()}@example.com",
+            nickname = "playlistuser",
+            accessLevel = AccessLevel.USER,
+            provider = AuthProvider.LOCAL,
+            isActive = true,
+            isVerified = false,
+            createdBy = "system",
+            modifiedBy = "system"
         )
+        val saved = userRepository.save(user)
+        userRepository.flush()
+        return saved
     }
 
     fun createPlaylist(user: User, name: String): Playlist {
-        return playlistRepository.save(
-            Playlist(
-                user = user,
-                name = name,
-                type = "CUSTOM",
-                isPublic = false,
-                createdBy = "system",
-                modifiedBy = "system"
-            )
+        val playlist = Playlist(
+            user = user,
+            name = name,
+            type = "CUSTOM",
+            isPublic = false,
+            createdBy = "system",
+            modifiedBy = "system"
         )
+        val saved = playlistRepository.save(playlist)
+        playlistRepository.flush()
+        return saved
     }
 
     init {
