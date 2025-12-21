@@ -18,6 +18,7 @@ class ProxyController {
 
     private val httpClient = HttpClient.newBuilder()
         .connectTimeout(Duration.ofSeconds(10))
+        .followRedirects(HttpClient.Redirect.NORMAL) // Follow redirects (302, 301, etc.)
         .build()
 
     @GetMapping("/image")
@@ -35,7 +36,8 @@ class ProxyController {
 
             val response = httpClient.send(request, HttpResponse.BodyHandlers.ofByteArray())
             
-            if (response.statusCode() == 200) {
+            // Handle successful responses (200) and redirects that were followed (should be 200 after redirect)
+            if (response.statusCode() in 200..299) {
                 // Determine content type from response or default to image
                 val contentType = response.headers().firstValue("Content-Type")
                     .orElse(MediaType.IMAGE_JPEG_VALUE)
@@ -48,9 +50,14 @@ class ProxyController {
                     .headers(headers)
                     .body(response.body())
             } else {
+                // Log the error for debugging
+                println("Proxy image error: Status code ${response.statusCode()} for fileId: $fileId")
                 ResponseEntity.status(HttpStatus.BAD_GATEWAY).build()
             }
         } catch (e: Exception) {
+            // Log the exception for debugging
+            println("Proxy image exception for fileId: $fileId - ${e.message}")
+            e.printStackTrace()
             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
         }
     }
@@ -70,7 +77,8 @@ class ProxyController {
 
             val response = httpClient.send(request, HttpResponse.BodyHandlers.ofByteArray())
             
-            if (response.statusCode() == 200) {
+            // Handle successful responses (200) and redirects that were followed (should be 200 after redirect)
+            if (response.statusCode() in 200..299) {
                 // Determine content type from response or default to audio
                 val contentType = response.headers().firstValue("Content-Type")
                     .orElse(MediaType.APPLICATION_OCTET_STREAM_VALUE)
@@ -84,9 +92,14 @@ class ProxyController {
                     .headers(headers)
                     .body(response.body())
             } else {
+                // Log the error for debugging
+                println("Proxy audio error: Status code ${response.statusCode()} for fileId: $fileId")
                 ResponseEntity.status(HttpStatus.BAD_GATEWAY).build()
             }
         } catch (e: Exception) {
+            // Log the exception for debugging
+            println("Proxy audio exception for fileId: $fileId - ${e.message}")
+            e.printStackTrace()
             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
         }
     }
