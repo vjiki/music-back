@@ -53,18 +53,9 @@ data class Song(
 
     @Version
     @Column(name = "version", nullable = false)
-<<<<<<< HEAD:src/main/java/com/vjiki/music/entity/Song.java
-    private Integer version;
-
-    @Column(name = "active", nullable = false)
-    @Builder.Default
-    private Boolean active = false;
-}
-=======
     var version: Int = 0,
 
     @Column(name = "active", nullable = false)
     var active: Boolean = false
 )
->>>>>>> feature/kotlin-implementation:src/main/kotlin/com/vjiki/music/entity/Song.kt
 
