@@ -13,6 +13,7 @@ import com.vjiki.music.repository.PlaylistRepository
 import com.vjiki.music.repository.PlaylistSongRepository
 import com.vjiki.music.repository.SongRepository
 import com.vjiki.music.repository.UserRepository
+import jakarta.persistence.EntityManager
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.OffsetDateTime
@@ -25,7 +26,8 @@ class SongLikeServiceImpl(
     private val songRepository: SongRepository,
     private val userRepository: UserRepository,
     private val playlistRepository: PlaylistRepository,
-    private val playlistSongRepository: PlaylistSongRepository
+    private val playlistSongRepository: PlaylistSongRepository,
+    private val entityManager: EntityManager
 ) : SongLikeService {
 
     companion object {
@@ -35,10 +37,6 @@ class SongLikeServiceImpl(
 
     @Transactional
     override fun likeSong(userId: UUID, songId: UUID) {
-        if (likeRepository.existsByUserIdAndSongIdAndRevokedAtIsNull(userId, songId)) {
-            return // already liked
-        }
-
         val existingDislike = dislikeRepository.findByUserIdAndSongIdAndRevokedAtIsNull(userId, songId)
         if (existingDislike.isPresent) {
             val dislike = existingDislike.get()
@@ -47,28 +45,17 @@ class SongLikeServiceImpl(
             removeSongFromPlaylist(userId, songId, DEFAULT_DISLIKES_PLAYLIST_NAME)
         }
 
-        val user = userRepository.findById(userId)
-            .orElseThrow { IllegalArgumentException("User not found: $userId") }
-        val song = songRepository.findById(songId)
-            .orElseThrow { IllegalArgumentException("Song not found: $songId") }
-
-        val like = Like(
-            user = user,
-            song = song,
-            createdBy = "system"
-        )
-        likeRepository.save(like)
-
-        addSongToPlaylist(user, song, DEFAULT_LIKES_PLAYLIST_NAME)
+        // Use native SQL query to insert directly into database
+        // This bypasses JPA entity issues and lets PostgreSQL generate the UUID and timestamps
+        likeRepository.insertLike(userId, songId, "system")
+        
+        // Use native SQL query to add song to playlist
+        playlistSongRepository.addSongToPlaylistIfNotExists(userId, songId, DEFAULT_LIKES_PLAYLIST_NAME)
         updateSongCounts(songId)
     }
 
     @Transactional
     override fun dislikeSong(userId: UUID, songId: UUID) {
-        if (dislikeRepository.existsByUserIdAndSongIdAndRevokedAtIsNull(userId, songId)) {
-            return // already disliked
-        }
-
         val existingLike = likeRepository.findByUserIdAndSongIdAndRevokedAtIsNull(userId, songId)
         if (existingLike.isPresent) {
             val like = existingLike.get()
@@ -77,19 +64,12 @@ class SongLikeServiceImpl(
             removeSongFromPlaylist(userId, songId, DEFAULT_LIKES_PLAYLIST_NAME)
         }
 
-        val user = userRepository.findById(userId)
-            .orElseThrow { IllegalArgumentException("User not found: $userId") }
-        val song = songRepository.findById(songId)
-            .orElseThrow { IllegalArgumentException("Song not found: $songId") }
-
-        val dislike = Dislike(
-            user = user,
-            song = song,
-            createdBy = "system"
-        )
-        dislikeRepository.save(dislike)
-
-        addSongToPlaylist(user, song, DEFAULT_DISLIKES_PLAYLIST_NAME)
+        // Use native SQL query to insert directly into database
+        // This bypasses JPA entity issues and lets PostgreSQL generate the UUID and timestamps
+        dislikeRepository.insertDislike(userId, songId, "system")
+        
+        // Use native SQL query to add song to playlist
+        playlistSongRepository.addSongToPlaylistIfNotExists(userId, songId, DEFAULT_DISLIKES_PLAYLIST_NAME)
         updateSongCounts(songId)
     }
 

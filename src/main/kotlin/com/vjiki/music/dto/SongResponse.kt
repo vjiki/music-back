@@ -8,6 +8,10 @@ data class SongResponse(
     @JsonProperty("audio_url")
     val audioUrl: String?,
     val cover: String?,
-    val title: String?
+    val title: String?,
+    val isLiked: Boolean = false,
+    val isDisliked: Boolean = false,
+    val likesCount: Long = 0L,
+    val dislikesCount: Long = 0L
 )
 

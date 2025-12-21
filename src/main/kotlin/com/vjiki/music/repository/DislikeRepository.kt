@@ -2,6 +2,7 @@ package com.vjiki.music.repository
 
 import com.vjiki.music.entity.Dislike
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
@@ -18,5 +19,16 @@ interface DislikeRepository : JpaRepository<Dislike, UUID> {
 
     @Query("SELECT COUNT(d) FROM Dislike d WHERE d.song.id = :songId AND d.revokedAt IS NULL")
     fun countBySongIdAndRevokedAtIsNull(@Param("songId") songId: UUID): Long
+
+    @Modifying
+    @Query(
+        value = "INSERT INTO music.dislikes (user_id, song_id, created_by) VALUES (:userId, :songId, :createdBy)",
+        nativeQuery = true
+    )
+    fun insertDislike(
+        @Param("userId") userId: UUID,
+        @Param("songId") songId: UUID,
+        @Param("createdBy") createdBy: String = "system"
+    )
 }
 

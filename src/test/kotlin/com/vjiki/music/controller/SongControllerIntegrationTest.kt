@@ -66,7 +66,7 @@ open class SongControllerIntegrationTest : DescribeSpec() {
                 modifiedBy = "system"
             ))
 
-            val userId = "test-user-id"
+            val userId = java.util.UUID.randomUUID()
 
             mockMvc.perform(get("/api/v1/songs/{userId}", userId))
                 .andExpect(status().isOk)
@@ -77,7 +77,7 @@ open class SongControllerIntegrationTest : DescribeSpec() {
         }
 
         it("should return empty list when no active songs exist") {
-            val userId = "test-user-id"
+            val userId = java.util.UUID.randomUUID()
 
             mockMvc.perform(get("/api/v1/songs/{userId}", userId))
                 .andExpect(status().isOk)

@@ -25,5 +25,40 @@ interface PlaylistSongRepository : JpaRepository<PlaylistSong, UUID> {
     @Transactional
     @Query("DELETE FROM PlaylistSong ps WHERE ps.playlist.id = :playlistId AND ps.song.id = :songId")
     fun deleteByPlaylistIdAndSongId(@Param("playlistId") playlistId: UUID, @Param("songId") songId: UUID)
+
+    @Modifying
+    @Query(
+        value = """
+        WITH playlist_id AS (
+            SELECT id FROM music.playlists 
+            WHERE user_id = :userId AND name = :playlistName
+            LIMIT 1
+        ),
+        max_position AS (
+            SELECT COALESCE(MAX(position), -1) + 1 AS next_position
+            FROM music.playlist_songs
+            WHERE playlist_id = (SELECT id FROM playlist_id)
+        )
+        INSERT INTO music.playlist_songs (playlist_id, song_id, position, added_by, created_at, modified_at)
+        SELECT 
+            (SELECT id FROM playlist_id),
+            :songId,
+            (SELECT next_position FROM max_position),
+            :userId,
+            NOW(),
+            NOW()
+        WHERE EXISTS (SELECT 1 FROM playlist_id)
+          AND NOT EXISTS (
+              SELECT 1 FROM music.playlist_songs 
+              WHERE playlist_id = (SELECT id FROM playlist_id) AND song_id = :songId
+          )
+        """,
+        nativeQuery = true
+    )
+    fun addSongToPlaylistIfNotExists(
+        @Param("userId") userId: UUID,
+        @Param("songId") songId: UUID,
+        @Param("playlistName") playlistName: String
+    )
 }
 
