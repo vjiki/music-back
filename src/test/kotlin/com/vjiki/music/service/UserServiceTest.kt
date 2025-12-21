@@ -9,6 +9,7 @@ import com.vjiki.music.entity.User
 import com.vjiki.music.repository.UserRepository
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -55,7 +56,7 @@ class UserServiceTest : DescribeSpec({
             val exception = kotlin.runCatching { userService.getUserById(userId) }
                 .exceptionOrNull()
 
-            exception shouldBe kotlin.test.assertNotNull(exception)
+            exception shouldNotBe null
             exception?.message shouldBe "User not found with id: $userId"
         }
     }

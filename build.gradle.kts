@@ -2,7 +2,7 @@ plugins {
 	kotlin("jvm") version "2.2.21"
 	kotlin("plugin.spring") version "2.2.21"
 	kotlin("plugin.jpa") version "2.2.21"
-	id("org.springframework.boot") version "3.5.9"
+	id("org.springframework.boot") version "3.5.8-SNAPSHOT"
 	id("io.spring.dependency-management") version "1.1.7"
 }
 
@@ -20,8 +20,15 @@ kotlin {
 	jvmToolchain(21)
 }
 
+configurations {
+	compileOnly {
+		extendsFrom(configurations.annotationProcessor.get())
+	}
+}
+
 repositories {
 	mavenCentral()
+	maven { url = uri("https://repo.spring.io/snapshot") }
 }
 
 dependencies {
@@ -47,8 +54,12 @@ dependencies {
 	testImplementation("io.kotest:kotest-runner-junit5:5.9.1")
 	testImplementation("io.kotest:kotest-assertions-core:5.9.1")
 	testImplementation("io.kotest:kotest-property:5.9.1")
+	testImplementation("io.kotest.extensions:kotest-extensions-spring:1.1.3")
 	testImplementation("io.mockk:mockk:1.14.6")
 	testImplementation("com.ninja-squad:springmockk:4.0.2")
+	testImplementation("org.testcontainers:testcontainers:1.19.8")
+	testImplementation("org.testcontainers:junit-jupiter:1.19.8")
+	testImplementation("org.testcontainers:postgresql:1.19.8")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 

@@ -1,39 +1,85 @@
 package com.vjiki.music.controller
 
+import com.vjiki.music.config.TestContainersConfig
 import com.vjiki.music.dto.AuthRequest
-import com.vjiki.music.dto.AuthResponse
-import com.vjiki.music.service.UserService
+import org.springframework.test.context.DynamicPropertyRegistry
+import org.springframework.test.context.DynamicPropertySource
+import com.vjiki.music.entity.AccessLevel
+import com.vjiki.music.entity.AuthProvider
+import com.vjiki.music.entity.User
+import com.vjiki.music.repository.UserRepository
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.kotest.core.spec.style.DescribeSpec
-import io.mockk.every
-import io.mockk.mockk
+import io.kotest.extensions.spring.SpringExtension
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.boot.test.context.TestConfiguration
-import org.springframework.context.annotation.Bean
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
+import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
+import org.springframework.transaction.annotation.Transactional
 import java.util.*
 
-@WebMvcTest(AuthController::class)
-@ContextConfiguration(classes = [AuthControllerIntegrationTest.TestConfig::class])
-class AuthControllerIntegrationTest(
-    @Autowired val mockMvc: MockMvc,
-    @Autowired val objectMapper: ObjectMapper
-) : DescribeSpec({
+@SpringBootTest
+@AutoConfigureMockMvc
+@Transactional
+open class AuthControllerIntegrationTest : DescribeSpec() {
 
-    val userService = mockk<UserService>()
+    companion object {
+        @JvmStatic
+        @DynamicPropertySource
+        fun configureProperties(registry: DynamicPropertyRegistry) {
+            val container = TestContainersConfig.postgresContainer
+            registry.add("spring.datasource.url") { container.jdbcUrl }
+            registry.add("spring.datasource.username") { container.username }
+            registry.add("spring.datasource.password") { container.password }
+            registry.add("spring.datasource.driver-class-name") { "org.postgresql.Driver" }
+            registry.add("spring.jpa.hibernate.ddl-auto") { "create-drop" }
+            registry.add("spring.jpa.properties.hibernate.default_schema") { "music" }
+            registry.add("spring.jpa.show-sql") { "false" }
+            registry.add("spring.jpa.properties.hibernate.dialect") { "org.hibernate.dialect.PostgreSQLDialect" }
+            registry.add("spring.jpa.properties.hibernate.jdbc.lob.non_contextual_creation") { "true" }
+        }
+    }
 
-    describe("POST /api/v1/auth/authenticate") {
-        it("should return 200 for successful authentication") {
-            val userId = UUID.randomUUID()
-            val authRequest = AuthRequest("test@example.com", "password123")
-            val authResponse = AuthResponse(true, userId, "Authentication successful")
+    override fun extensions() = listOf(SpringExtension)
 
-            every { userService.authenticate(authRequest) } returns authResponse
+    @Autowired
+    lateinit var mockMvc: MockMvc
+
+    @Autowired
+    lateinit var objectMapper: ObjectMapper
+
+    @Autowired
+    lateinit var userRepository: UserRepository
+
+    @Autowired
+    lateinit var passwordEncoder: PasswordEncoder
+
+    init {
+    describe("AuthController Integration Tests") {
+        it("should authenticate user with valid credentials") {
+            val email = "authcontroller@example.com"
+            val password = "password123"
+            
+            val user = User(
+                email = email,
+                nickname = "testuser",
+                passwordHash = passwordEncoder.encode(password),
+                accessLevel = AccessLevel.USER,
+                provider = AuthProvider.LOCAL,
+                isActive = true,
+                isVerified = false,
+                createdBy = "system",
+                modifiedBy = "system"
+            )
+            userRepository.save(user)
+            userRepository.flush()
+
+            val authRequest = AuthRequest(email, password)
 
             mockMvc.perform(
                 post("/api/v1/auth/authenticate")
@@ -41,15 +87,45 @@ class AuthControllerIntegrationTest(
                     .content(objectMapper.writeValueAsString(authRequest))
             )
                 .andExpect(status().isOk)
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.authenticated").value(true))
-                .andExpect(jsonPath("$.userId").value(userId.toString()))
+                .andExpect(jsonPath("$.userId").exists())
+                .andExpect(jsonPath("$.message").value("Authentication successful"))
         }
 
-        it("should return 401 for failed authentication") {
-            val authRequest = AuthRequest("test@example.com", "wrongpassword")
-            val authResponse = AuthResponse(false, null, "Invalid email or password")
+        it("should return 401 with invalid credentials") {
+            val email = "invalid@example.com"
+            val password = "wrongpassword"
+            
+            val user = User(
+                email = email,
+                nickname = "testuser",
+                passwordHash = passwordEncoder.encode("correctpassword"),
+                accessLevel = AccessLevel.USER,
+                provider = AuthProvider.LOCAL,
+                isActive = true,
+                isVerified = false,
+                createdBy = "system",
+                modifiedBy = "system"
+            )
+            userRepository.save(user)
+            userRepository.flush()
 
-            every { userService.authenticate(authRequest) } returns authResponse
+            val authRequest = AuthRequest(email, password)
+
+            mockMvc.perform(
+                post("/api/v1/auth/authenticate")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(authRequest))
+            )
+                .andExpect(status().isUnauthorized)
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.authenticated").value(false))
+                .andExpect(jsonPath("$.message").value("Invalid email or password"))
+        }
+
+        it("should return 401 for non-existent user") {
+            val authRequest = AuthRequest("nonexistent@example.com", "password")
 
             mockMvc.perform(
                 post("/api/v1/auth/authenticate")
@@ -59,12 +135,39 @@ class AuthControllerIntegrationTest(
                 .andExpect(status().isUnauthorized)
                 .andExpect(jsonPath("$.authenticated").value(false))
         }
-    }
 
-    @TestConfiguration
-    class TestConfig {
-        @Bean
-        fun userService(): UserService = mockk()
-    }
-})
+        it("should return 401 for inactive user") {
+            val email = "inactive@example.com"
+            val password = "password123"
+            
+            val user = User(
+                email = email,
+                nickname = "testuser",
+                passwordHash = passwordEncoder.encode(password),
+                accessLevel = AccessLevel.USER,
+                provider = AuthProvider.LOCAL,
+                isActive = true,
+                isVerified = false,
+                createdBy = "system",
+                modifiedBy = "system"
+            )
+            val savedUser = userRepository.save(user)
+            userRepository.flush()
+            savedUser.isActive = false
+            userRepository.save(savedUser)
+            userRepository.flush()
 
+            val authRequest = AuthRequest(email, password)
+
+            mockMvc.perform(
+                post("/api/v1/auth/authenticate")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(authRequest))
+            )
+                .andExpect(status().isUnauthorized)
+                .andExpect(jsonPath("$.authenticated").value(false))
+                .andExpect(jsonPath("$.message").value("User account is inactive"))
+        }
+    }
+    }
+}

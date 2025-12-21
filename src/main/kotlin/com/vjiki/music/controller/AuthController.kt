@@ -8,11 +8,13 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/v1/auth")
+@CrossOrigin(origins = ["*"], maxAge = 3600)
 class AuthController(
     private val userService: UserService
 ) {
 
     @PostMapping("/authenticate")
+    @CrossOrigin(origins = ["*"])
     fun authenticate(@RequestBody authRequest: AuthRequest): ResponseEntity<AuthResponse> {
         val authResponse = userService.authenticate(authRequest)
 

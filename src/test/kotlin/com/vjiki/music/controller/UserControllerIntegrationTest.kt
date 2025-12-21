@@ -20,7 +20,6 @@ import java.time.OffsetDateTime
 import java.util.*
 
 @WebMvcTest(UserController::class)
-@ContextConfiguration(classes = [UserControllerIntegrationTest.TestConfig::class])
 class UserControllerIntegrationTest(
     @Autowired val mockMvc: MockMvc,
     @Autowired val objectMapper: ObjectMapper
@@ -60,12 +59,6 @@ class UserControllerIntegrationTest(
             mockMvc.perform(get("/api/v1/users/$userId"))
                 .andExpect(status().is5xxServerError)
         }
-    }
-
-    @TestConfiguration
-    class TestConfig {
-        @Bean
-        fun userService(): UserService = mockk()
     }
 })
 

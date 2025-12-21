@@ -1,8 +1,8 @@
 package com.vjiki.music.service
 
 import com.vjiki.music.dto.PlaylistResponse
-import com.vjiki.music.entity.Playlist
-import com.vjiki.music.entity.User
+import com.vjiki.music.dto.PlaylistWithSongsResponse
+import com.vjiki.music.entity.*
 import com.vjiki.music.repository.PlaylistRepository
 import com.vjiki.music.repository.PlaylistSongRepository
 import io.kotest.core.spec.style.DescribeSpec
@@ -27,15 +27,16 @@ class PlaylistServiceTest : DescribeSpec({
                 id = userId,
                 email = "test@example.com",
                 nickname = "testuser",
+                provider = AuthProvider.LOCAL,
+                accessLevel = AccessLevel.USER,
+                isActive = true,
                 createdBy = "system",
                 modifiedBy = "system"
             )
-
             val playlist = Playlist(
                 id = UUID.randomUUID(),
                 user = user,
                 name = "My Playlist",
-                description = "Test playlist",
                 type = "CUSTOM",
                 isPublic = false,
                 createdBy = "system",
@@ -48,11 +49,10 @@ class PlaylistServiceTest : DescribeSpec({
 
             result.size shouldBe 1
             result[0].name shouldBe "My Playlist"
-            result[0].userId shouldBe userId
             verify { playlistRepository.findByUserIdWithUser(userId) }
         }
 
-        it("should return empty list when no playlists found") {
+        it("should return empty list when user has no playlists") {
             val userId = UUID.randomUUID()
             every { playlistRepository.findByUserIdWithUser(userId) } returns emptyList()
 
@@ -63,36 +63,56 @@ class PlaylistServiceTest : DescribeSpec({
     }
 
     describe("getPlaylistWithSongs") {
-        it("should return playlist with songs when found") {
+        it("should return playlist with songs") {
             val playlistId = UUID.randomUUID()
             val userId = UUID.randomUUID()
             val user = User(
                 id = userId,
                 email = "test@example.com",
                 nickname = "testuser",
+                provider = AuthProvider.LOCAL,
+                accessLevel = AccessLevel.USER,
+                isActive = true,
                 createdBy = "system",
                 modifiedBy = "system"
             )
-
             val playlist = Playlist(
                 id = playlistId,
                 user = user,
                 name = "My Playlist",
-                description = "Test playlist",
                 type = "CUSTOM",
                 isPublic = false,
                 createdBy = "system",
                 modifiedBy = "system"
             )
+            val song = Song(
+                id = UUID.randomUUID(),
+                artists = mapOf("default" to listOf("Artist")),
+                audioUrls = mapOf("default" to "http://audio.com"),
+                coverUrls = mapOf("default" to "http://cover.com"),
+                title = "Test Song",
+                active = true,
+                createdBy = "system",
+                modifiedBy = "system"
+            )
+            val playlistSong = PlaylistSong(
+                id = UUID.randomUUID(),
+                playlist = playlist,
+                song = song,
+                position = 0,
+                addedBy = user
+            )
 
             every { playlistRepository.findById(playlistId) } returns Optional.of(playlist)
-            every { playlistSongRepository.findByPlaylistIdWithSong(playlistId) } returns emptyList()
+            every { playlistSongRepository.findByPlaylistIdWithSong(playlistId) } returns listOf(playlistSong)
 
             val result = playlistService.getPlaylistWithSongs(playlistId)
 
             result.id shouldBe playlistId
             result.name shouldBe "My Playlist"
-            result.songs shouldBe emptyList()
+            result.songs.size shouldBe 1
+            verify { playlistRepository.findById(playlistId) }
+            verify { playlistSongRepository.findByPlaylistIdWithSong(playlistId) }
         }
 
         it("should throw exception when playlist not found") {
@@ -107,4 +127,3 @@ class PlaylistServiceTest : DescribeSpec({
         }
     }
 })
-
