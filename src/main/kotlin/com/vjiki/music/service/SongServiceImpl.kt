@@ -11,7 +11,7 @@ class SongServiceImpl(
 ) : SongService {
 
     override fun getSongs(userId: String): List<SongResponse> {
-        return songRepository.findAll().map { it.toResponse() }
+        return songRepository.findAllActive().map { it.toResponse() }
     }
 }
 

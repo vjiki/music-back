@@ -53,6 +53,9 @@ data class Song(
 
     @Version
     @Column(name = "version", nullable = false)
-    var version: Int = 0
+    var version: Int = 0,
+
+    @Column(name = "active", nullable = false)
+    var active: Boolean = false
 )
 
