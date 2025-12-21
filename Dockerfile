@@ -1,5 +1,5 @@
-# Use lightweight JDK 25 image
-FROM eclipse-temurin:25-jdk-jammy AS builder
+# Use JDK 21 image (matching build.gradle.kts Kotlin JVM toolchain)
+FROM eclipse-temurin:21-jdk-jammy AS builder
 
 WORKDIR /app
 
@@ -9,18 +9,19 @@ COPY gradle gradle
 COPY build.gradle.kts settings.gradle.kts ./
 
 # Pre-fetch dependencies (optional but speeds up build)
+# This layer will be cached if dependencies don't change
 RUN ./gradlew dependencies --no-daemon || true
 
-# Copy source
+# Copy remaining source files (Kotlin sources and resources)
 COPY . .
 
-# Build the JAR
+# Build the JAR (Kotlin will be compiled to JVM bytecode)
 RUN ./gradlew clean build -x test --no-daemon
 
 # =========================
 # Run stage
 # =========================
-FROM eclipse-temurin:25-jre-jammy
+FROM eclipse-temurin:21-jre-jammy
 
 WORKDIR /app
 
@@ -30,5 +31,5 @@ COPY --from=builder /app/build/libs/*.jar app.jar
 # Expose port (Spring Boot default)
 EXPOSE 8080
 
-# Run the app
+# Run the app (Kotlin compiled to JVM bytecode runs the same way)
 ENTRYPOINT ["java", "-jar", "app.jar"]
