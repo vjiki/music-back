@@ -23,7 +23,7 @@ class ChatListServiceImpl(
 
     private fun mapToChatListItem(chat: com.vjiki.music.entity.Chat, currentUserId: UUID): ChatListItemResponse {
         val lastMessages = messageRepository.findMessagesByChatId(chat.id)
-        val lastMessage = lastMessages.firstOrNull { it.isDeleted != true }
+        val lastMessage = lastMessages.firstOrNull { !it.isDeleted }
 
         val participants = chatParticipantRepository.findByChatId(chat.id)
 

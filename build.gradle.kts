@@ -1,8 +1,8 @@
 plugins {
-	kotlin("jvm") version "2.0.21"
-	kotlin("plugin.spring") version "2.0.21"
-	kotlin("plugin.jpa") version "2.0.21"
-	id("org.springframework.boot") version "3.3.5"
+	kotlin("jvm") version "2.2.21"
+	kotlin("plugin.spring") version "2.2.21"
+	kotlin("plugin.jpa") version "2.2.21"
+	id("org.springframework.boot") version "3.5.9"
 	id("io.spring.dependency-management") version "1.1.7"
 }
 
@@ -44,18 +44,18 @@ dependencies {
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.springframework.graphql:spring-graphql-test")
 	testImplementation("org.springframework.security:spring-security-test")
-	testImplementation("io.kotest:kotest-runner-junit5:5.8.1")
-	testImplementation("io.kotest:kotest-assertions-core:5.8.1")
-	testImplementation("io.kotest:kotest-property:5.8.1")
-	testImplementation("io.mockk:mockk:1.13.10")
+	testImplementation("io.kotest:kotest-runner-junit5:5.9.1")
+	testImplementation("io.kotest:kotest-assertions-core:5.9.1")
+	testImplementation("io.kotest:kotest-property:5.9.1")
+	testImplementation("io.mockk:mockk:1.14.6")
 	testImplementation("com.ninja-squad:springmockk:4.0.2")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-	kotlinOptions {
-		freeCompilerArgs = listOf("-Xjsr305=strict")
-		jvmTarget = "21"
+	compilerOptions {
+		freeCompilerArgs.add("-Xjsr305=strict")
+		jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
 	}
 }
 
