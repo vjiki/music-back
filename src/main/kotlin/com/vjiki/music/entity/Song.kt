@@ -28,6 +28,10 @@ data class Song(
     @Column(name = "cover_urls", nullable = false, columnDefinition = "jsonb")
     val coverUrls: Map<String, String>,
 
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "video_urls", nullable = false, columnDefinition = "jsonb")
+    val videoUrls: Map<String, String> = emptyMap(),
+
     @Column(name = "title", nullable = false)
     val title: String,
 
@@ -56,6 +60,9 @@ data class Song(
     var version: Int = 0,
 
     @Column(name = "active", nullable = false)
-    var active: Boolean = false
+    var active: Boolean = false,
+
+    @Column(name = "type", nullable = false)
+    val type: String = "SONG"
 )
 

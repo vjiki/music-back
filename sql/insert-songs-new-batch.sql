@@ -838,3 +838,408 @@ INSERT INTO music.songs (
     true
 );
 
+-- Sero4ka - Гей Порно
+INSERT INTO music.songs (
+    title,
+    artists,
+    audio_urls,
+    cover_urls,
+    created_by,
+    modified_by,
+    version,
+    likes_count,
+    dislikes_count,
+    access_level,
+    active
+) VALUES (
+    'Гей Порно',
+    '{"default":["Sero4ka"]}'::jsonb,
+    '{"default":"https://drive.google.com/uc?export=download&id=1oswRezoZooJrbpnJ2TRMIaeT__5MbJ1g"}'::jsonb,
+    '{"default":"https://drive.google.com/uc?export=download&id=1-4NAB-WD2BSfde0F7Aeay0M0fqAiRVXU"}'::jsonb,
+    'system',
+    'system',
+    0,
+    0,
+    0,
+    'USER',
+    true
+);
+
+-- Пневмослон - Сергей
+INSERT INTO music.songs (
+    title,
+    artists,
+    audio_urls,
+    cover_urls,
+    created_by,
+    modified_by,
+    version,
+    likes_count,
+    dislikes_count,
+    access_level,
+    active
+) VALUES (
+    'Сергей',
+    '{"default":["Пневмослон"]}'::jsonb,
+    '{"default":"https://drive.google.com/uc?export=download&id=1Hii7sswdyGI80svk3mygOhCofsNwGRyF"}'::jsonb,
+    '{"default":"https://drive.google.com/uc?export=download&id=1Uq_6nAoA9EskL0mAqlw-Awvs-jimRYWF"}'::jsonb,
+    'system',
+    'system',
+    0,
+    0,
+    0,
+    'USER',
+    true
+);
+
+-- Валентин Стрыкало - Серёжа
+INSERT INTO music.songs (
+    title,
+    artists,
+    audio_urls,
+    cover_urls,
+    created_by,
+    modified_by,
+    version,
+    likes_count,
+    dislikes_count,
+    access_level,
+    active
+) VALUES (
+    'Серёжа',
+    '{"default":["Валентин Стрыкало"]}'::jsonb,
+    '{"default":"https://drive.google.com/uc?export=download&id=1KUzJoWxEdxst9-2pK6_5MwzxKfYcRmVG"}'::jsonb,
+    '{"default":"https://drive.google.com/uc?export=download&id=1DWcCo5cjgNzTOApmmZVsG-JAGqxj_Ac5"}'::jsonb,
+    'system',
+    'system',
+    0,
+    0,
+    0,
+    'USER',
+    true
+);
+
+-- Краски - Я люблю тебя Гей
+INSERT INTO music.songs (
+    title,
+    artists,
+    audio_urls,
+    cover_urls,
+    created_by,
+    modified_by,
+    version,
+    likes_count,
+    dislikes_count,
+    access_level,
+    active
+) VALUES (
+    'Я люблю тебя Гей',
+    '{"default":["Краски"]}'::jsonb,
+    '{"default":"https://drive.google.com/uc?export=download&id=1MA1dg_nZXAghP5K6XReCkB1QtRtl64yX"}'::jsonb,
+    '{"default":"https://drive.google.com/uc?export=download&id=1BXZKfE2tW7PPed_j-2YfcPF6HADuSelX"}'::jsonb,
+    'system',
+    'system',
+    0,
+    0,
+    0,
+    'USER',
+    true
+);
+
+-- DAKOOKA, Аигел - Без настроения
+INSERT INTO music.songs (
+    title,
+    artists,
+    audio_urls,
+    cover_urls,
+    created_by,
+    modified_by,
+    version,
+    likes_count,
+    dislikes_count,
+    access_level,
+    active
+) VALUES (
+    'Без настроения',
+    '{"default":["DAKOOKA", "Аигел"]}'::jsonb,
+    '{"default":"https://drive.google.com/uc?export=download&id=1IU-4d2N_bzc2zGbbFQVFeR0Ue_Aizea-"}'::jsonb,
+    '{"default":"https://drive.google.com/uc?export=download&id=1Db8UVGdyFKf1UL0EjBj-3KIpgyZazayg"}'::jsonb,
+    'system',
+    'system',
+    0,
+    0,
+    0,
+    'USER',
+    true
+);
+
+-- Eminem - Legacy
+INSERT INTO music.songs (
+    title,
+    artists,
+    audio_urls,
+    cover_urls,
+    created_by,
+    modified_by,
+    version,
+    likes_count,
+    dislikes_count,
+    access_level,
+    active
+) VALUES (
+    'Legacy',
+    '{"default":["Eminem"]}'::jsonb,
+    '{"default":"https://drive.google.com/uc?export=download&id=1ibaH_s6WVxi6IFYg3T5KmskapVifsJ92"}'::jsonb,
+    '{"default":"https://drive.google.com/uc?export=download&id=1v_Dt2ITVGiqoMbMdqcCjSPmmRjdZZRzR"}'::jsonb,
+    'system',
+    'system',
+    0,
+    0,
+    0,
+    'USER',
+    true
+);
+
+-- La Dispute - Jar
+INSERT INTO music.songs (
+    title,
+    artists,
+    audio_urls,
+    cover_urls,
+    created_by,
+    modified_by,
+    version,
+    likes_count,
+    dislikes_count,
+    access_level,
+    active
+) VALUES (
+    'Jar',
+    '{"default":["La Dispute"]}'::jsonb,
+    '{"default":"https://drive.google.com/uc?export=download&id=1KC3YgtgusJp2HKh-V7uWEMe_u8rxwwA6"}'::jsonb,
+    '{"default":"https://drive.google.com/uc?export=download&id=11TpGwAbvBi7tV0Ja0sIS_TndsIYO4yId"}'::jsonb,
+    'system',
+    'system',
+    0,
+    0,
+    0,
+    'USER',
+    true
+);
+
+-- La Dispute - Steve
+INSERT INTO music.songs (
+    title,
+    artists,
+    audio_urls,
+    cover_urls,
+    created_by,
+    modified_by,
+    version,
+    likes_count,
+    dislikes_count,
+    access_level,
+    active
+) VALUES (
+    'Steve',
+    '{"default":["La Dispute"]}'::jsonb,
+    '{"default":"https://drive.google.com/uc?export=download&id=1RL4pqr4B7lk6y7nMEdaSG_17yBRQ3MVd"}'::jsonb,
+    '{"default":"https://drive.google.com/uc?export=download&id=11TpGwAbvBi7tV0Ja0sIS_TndsIYO4yId"}'::jsonb,
+    'system',
+    'system',
+    0,
+    0,
+    0,
+    'USER',
+    true
+);
+
+-- La Dispute - You and I in Unison
+INSERT INTO music.songs (
+    title,
+    artists,
+    audio_urls,
+    cover_urls,
+    created_by,
+    modified_by,
+    version,
+    likes_count,
+    dislikes_count,
+    access_level,
+    active
+) VALUES (
+    'You and I in Unison',
+    '{"default":["La Dispute"]}'::jsonb,
+    '{"default":"https://drive.google.com/uc?export=download&id=182VusduleDNyvzE3g-C1iraKMRkmIwwb"}'::jsonb,
+    '{"default":"https://drive.google.com/uc?export=download&id=11TpGwAbvBi7tV0Ja0sIS_TndsIYO4yId"}'::jsonb,
+    'system',
+    'system',
+    0,
+    0,
+    0,
+    'USER',
+    true
+);
+
+-- La Dispute - Such Small Hands
+INSERT INTO music.songs (
+    title,
+    artists,
+    audio_urls,
+    cover_urls,
+    created_by,
+    modified_by,
+    version,
+    likes_count,
+    dislikes_count,
+    access_level,
+    active
+) VALUES (
+    'Such Small Hands',
+    '{"default":["La Dispute"]}'::jsonb,
+    '{"default":"https://drive.google.com/uc?export=download&id=1GgqVlQL_3lRAPkwmb2KZqIyaKf3dNDXi"}'::jsonb,
+    '{"default":"https://drive.google.com/uc?export=download&id=11TpGwAbvBi7tV0Ja0sIS_TndsIYO4yId"}'::jsonb,
+    'system',
+    'system',
+    0,
+    0,
+    0,
+    'USER',
+    true
+);
+
+-- La Dispute - Tovaritch Sovetskij
+INSERT INTO music.songs (
+    title,
+    artists,
+    audio_urls,
+    cover_urls,
+    created_by,
+    modified_by,
+    version,
+    likes_count,
+    dislikes_count,
+    access_level,
+    active
+) VALUES (
+    'Tovaritch Sovetskij',
+    '{"default":["La Dispute"]}'::jsonb,
+    '{"default":"https://drive.google.com/uc?export=download&id=11rh7gKgL4ssIdbj5baY3BR83ojRP1qV3"}'::jsonb,
+    '{"default":"https://drive.google.com/uc?export=download&id=11TpGwAbvBi7tV0Ja0sIS_TndsIYO4yId"}'::jsonb,
+    'system',
+    'system',
+    0,
+    0,
+    0,
+    'USER',
+    true
+);
+
+-- Instagram First - Song 1
+INSERT INTO music.songs (
+    title,
+    artists,
+    audio_urls,
+    cover_urls,
+    created_by,
+    modified_by,
+    version,
+    likes_count,
+    dislikes_count,
+    access_level,
+    active
+) VALUES (
+    'Song 1',
+    '{"default":["Instagram First"]}'::jsonb,
+    '{"default":"https://drive.google.com/uc?export=download&id=1PDrXpc_wmpq0lZ86TLSrt-a8Y03Fo_-R"}'::jsonb,
+    NULL,
+    'system',
+    'system',
+    0,
+    0,
+    0,
+    'USER',
+    true
+);
+
+-- Instagram First - Song 2
+INSERT INTO music.songs (
+    title,
+    artists,
+    audio_urls,
+    cover_urls,
+    created_by,
+    modified_by,
+    version,
+    likes_count,
+    dislikes_count,
+    access_level,
+    active
+) VALUES (
+    'Song 2',
+    '{"default":["Instagram First"]}'::jsonb,
+    '{"default":"https://drive.google.com/uc?export=download&id=1_6vRinRmxWDS0avp2zG3aeqP-5Q7mEz-"}'::jsonb,
+    NULL,
+    'system',
+    'system',
+    0,
+    0,
+    0,
+    'USER',
+    true
+);
+
+-- Instagram First - Song 3
+INSERT INTO music.songs (
+    title,
+    artists,
+    audio_urls,
+    cover_urls,
+    created_by,
+    modified_by,
+    version,
+    likes_count,
+    dislikes_count,
+    access_level,
+    active
+) VALUES (
+    'Song 3',
+    '{"default":["Instagram First"]}'::jsonb,
+    '{"default":"https://drive.google.com/uc?export=download&id=1RqWfFzWYeKjW_5cU4s-4RQlc5uHgAnYo"}'::jsonb,
+    NULL,
+    'system',
+    'system',
+    0,
+    0,
+    0,
+    'USER',
+    true
+);
+
+-- Instagram First - Song 4
+INSERT INTO music.songs (
+    title,
+    artists,
+    audio_urls,
+    cover_urls,
+    created_by,
+    modified_by,
+    version,
+    likes_count,
+    dislikes_count,
+    access_level,
+    active
+) VALUES (
+    'Song 4',
+    '{"default":["Instagram First"]}'::jsonb,
+    '{"default":"https://drive.google.com/uc?export=download&id=1dM8nyYx9HY80ME-3Fa22fs4_QMe4UJbU"}'::jsonb,
+    NULL,
+    'system',
+    'system',
+    0,
+    0,
+    0,
+    'USER',
+    true
+);
+

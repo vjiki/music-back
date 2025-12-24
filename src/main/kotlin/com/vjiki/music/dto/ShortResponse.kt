@@ -2,7 +2,7 @@ package com.vjiki.music.dto
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
-data class SongResponse(
+data class ShortResponse(
     val id: String,
     val artist: String?,
     @JsonProperty("audio_url")
@@ -11,6 +11,7 @@ data class SongResponse(
     val title: String?,
     @JsonProperty("video_urls")
     val videoUrls: Map<String, String>?,
+    val type: String,
     val isLiked: Boolean = false,
     val isDisliked: Boolean = false,
     val likesCount: Long = 0L,

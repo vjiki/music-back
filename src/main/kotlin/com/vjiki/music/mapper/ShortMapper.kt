@@ -1,25 +1,25 @@
 package com.vjiki.music.mapper
 
-import com.vjiki.music.dto.SongResponse
+import com.vjiki.music.dto.ShortResponse
 import com.vjiki.music.entity.Song
 import org.springframework.stereotype.Component
-import java.util.UUID
 
 @Component
-object SongMapper {
-    fun Song.toResponse(
+object ShortMapper {
+    fun Song.toShortResponse(
         isLiked: Boolean = false,
         isDisliked: Boolean = false,
         likesCount: Long = this.likesCount,
         dislikesCount: Long = this.dislikesCount
-    ): SongResponse {
-        return SongResponse(
+    ): ShortResponse {
+        return ShortResponse(
             id = id.toString(),
             artist = extractArtist(artists),
             audioUrl = extractUrl(audioUrls),
             cover = extractUrl(coverUrls),
             title = title,
             videoUrls = videoUrls,
+            type = type,
             isLiked = isLiked,
             isDisliked = isDisliked,
             likesCount = likesCount,
