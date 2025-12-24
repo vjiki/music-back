@@ -9,8 +9,8 @@ data class ShortResponse(
     val audioUrl: String?,
     val cover: String?,
     val title: String?,
-    @JsonProperty("video_urls")
-    val videoUrls: Map<String, String>?,
+    @JsonProperty("video_url")
+    val videoUrl: String?,
     val type: String,
     val isLiked: Boolean = false,
     val isDisliked: Boolean = false,

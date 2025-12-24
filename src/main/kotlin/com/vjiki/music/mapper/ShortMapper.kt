@@ -18,7 +18,7 @@ object ShortMapper {
             audioUrl = extractUrl(audioUrls),
             cover = extractUrl(coverUrls),
             title = title,
-            videoUrls = videoUrls,
+            videoUrl = extractUrl(videoUrls),
             type = type,
             isLiked = isLiked,
             isDisliked = isDisliked,

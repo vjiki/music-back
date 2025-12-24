@@ -19,7 +19,7 @@ object SongMapper {
             audioUrl = extractUrl(audioUrls),
             cover = extractUrl(coverUrls),
             title = title,
-            videoUrls = videoUrls,
+            videoUrl = extractUrl(videoUrls),
             isLiked = isLiked,
             isDisliked = isDisliked,
             likesCount = likesCount,
