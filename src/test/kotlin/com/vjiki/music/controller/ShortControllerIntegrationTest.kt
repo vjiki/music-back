@@ -6,6 +6,7 @@ import com.vjiki.music.repository.SongRepository
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.extensions.spring.SpringExtension
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
@@ -90,7 +91,8 @@ open class ShortControllerIntegrationTest : DescribeSpec() {
                 val firstJson = first.response.contentAsString
                 val cursorRegex = """"nextCursor"\s*:\s*"([^"]+)"""".toRegex()
                 val cursor = cursorRegex.find(firstJson)?.groupValues?.get(1)
-                cursor shouldBe cursor?.isNotBlank()
+                cursor shouldNotBe null
+                cursor!!.isNotBlank() shouldBe true
 
                 mockMvc.perform(
                     get("/api/v1/shorts/{userId}/page", userId)

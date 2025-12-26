@@ -7,6 +7,7 @@ import com.vjiki.music.service.SongService
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.extensions.spring.SpringExtension
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
@@ -35,55 +36,60 @@ open class SongControllerIntegrationTest : DescribeSpec() {
 
     init {
         describe("GET /api/v1/songs/{userId}") {
-        it("should return list of active songs") {
-            val song1 = songRepository.save(Song(
-                artists = mapOf("default" to listOf("Artist 1")),
-                audioUrls = mapOf("default" to "http://audio.com/song1.mp3"),
-                coverUrls = mapOf("default" to "http://cover.com/cover1.jpg"),
-                title = "Song 1",
-                active = true,
-                createdBy = "system",
-                modifiedBy = "system"
-            ))
-            songRepository.save(Song(
-                artists = mapOf("default" to listOf("Artist 2")),
-                audioUrls = mapOf("default" to "http://audio.com/song2.mp3"),
-                coverUrls = mapOf("default" to "http://cover.com/cover2.jpg"),
-                title = "Song 2",
-                active = true,
-                createdBy = "system",
-                modifiedBy = "system"
-            ))
-            songRepository.save(Song(
-                artists = mapOf("default" to listOf("Artist 3")),
-                audioUrls = mapOf("default" to "http://audio.com/song3.mp3"),
-                coverUrls = mapOf("default" to "http://cover.com/cover3.jpg"),
-                title = "Song 3",
-                active = false,
-                createdBy = "system",
-                modifiedBy = "system"
-            ))
+            it("should return list of active songs") {
+                val song1 = songRepository.save(
+                    Song(
+                        artists = mapOf("default" to listOf("Artist 1")),
+                        audioUrls = mapOf("default" to "http://audio.com/song1.mp3"),
+                        coverUrls = mapOf("default" to "http://cover.com/cover1.jpg"),
+                        title = "Song 1",
+                        active = true,
+                        createdBy = "system",
+                        modifiedBy = "system"
+                    )
+                )
+                songRepository.save(
+                    Song(
+                        artists = mapOf("default" to listOf("Artist 2")),
+                        audioUrls = mapOf("default" to "http://audio.com/song2.mp3"),
+                        coverUrls = mapOf("default" to "http://cover.com/cover2.jpg"),
+                        title = "Song 2",
+                        active = true,
+                        createdBy = "system",
+                        modifiedBy = "system"
+                    )
+                )
+                songRepository.save(
+                    Song(
+                        artists = mapOf("default" to listOf("Artist 3")),
+                        audioUrls = mapOf("default" to "http://audio.com/song3.mp3"),
+                        coverUrls = mapOf("default" to "http://cover.com/cover3.jpg"),
+                        title = "Song 3",
+                        active = false,
+                        createdBy = "system",
+                        modifiedBy = "system"
+                    )
+                )
 
-            val userId = java.util.UUID.randomUUID()
+                val userId = java.util.UUID.randomUUID()
 
-            mockMvc.perform(get("/api/v1/songs/{userId}", userId))
-                .andExpect(status().isOk)
-                .andExpect(jsonPath("$").isArray)
-                .andExpect(jsonPath("$.length()").value(2))
-                .andExpect(jsonPath("$[0].title").exists())
-                .andExpect(jsonPath("$[1].title").exists())
+                mockMvc.perform(get("/api/v1/songs/{userId}", userId))
+                    .andExpect(status().isOk)
+                    .andExpect(jsonPath("$").isArray)
+                    .andExpect(jsonPath("$.length()").value(2))
+                    .andExpect(jsonPath("$[0].title").exists())
+                    .andExpect(jsonPath("$[1].title").exists())
+            }
+
+            it("should return empty list when no active songs exist") {
+                val userId = java.util.UUID.randomUUID()
+
+                mockMvc.perform(get("/api/v1/songs/{userId}", userId))
+                    .andExpect(status().isOk)
+                    .andExpect(jsonPath("$").isArray)
+                    .andExpect(jsonPath("$.length()").value(0))
+            }
         }
-
-        it("should return empty list when no active songs exist") {
-            val userId = java.util.UUID.randomUUID()
-
-            mockMvc.perform(get("/api/v1/songs/{userId}", userId))
-                .andExpect(status().isOk)
-                .andExpect(jsonPath("$").isArray)
-                .andExpect(jsonPath("$.length()").value(0))
-        }
-    }
-    }
 
         describe("GET /api/v1/songs/{userId}/page") {
             it("should return cursor-paginated songs and exclude non-SONG types") {
@@ -143,13 +149,14 @@ open class SongControllerIntegrationTest : DescribeSpec() {
                 val firstJson = first.response.contentAsString
                 val cursorRegex = """"nextCursor"\s*:\s*"([^"]+)"""".toRegex()
                 val cursor = cursorRegex.find(firstJson)?.groupValues?.get(1)
-                cursor shouldBe cursor?.isNotBlank()
+                cursor shouldNotBe null
+                cursor!!.isNotBlank() shouldBe true
 
                 // Second page
                 mockMvc.perform(
                     get("/api/v1/songs/{userId}/page", userId)
                         .param("limit", "2")
-                        .param("cursor", cursor!!)
+                        .param("cursor", cursor)
                 )
                     .andExpect(status().isOk)
                     .andExpect(jsonPath("$.items").isArray)
@@ -158,5 +165,6 @@ open class SongControllerIntegrationTest : DescribeSpec() {
                     .andExpect(jsonPath("$.nextCursor").doesNotExist())
             }
         }
+    }
 }
 
