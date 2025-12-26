@@ -1,14 +1,12 @@
 package com.vjiki.music.controller
 
 import com.vjiki.music.config.TestContainersConfig
-import com.vjiki.music.dto.SongResponse
 import com.vjiki.music.entity.Song
 import com.vjiki.music.repository.SongRepository
 import com.vjiki.music.service.SongService
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.extensions.spring.SpringExtension
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.shouldNotBe
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
@@ -47,7 +45,7 @@ open class SongControllerIntegrationTest : DescribeSpec() {
                 createdBy = "system",
                 modifiedBy = "system"
             ))
-            val song2 = songRepository.save(Song(
+            songRepository.save(Song(
                 artists = mapOf("default" to listOf("Artist 2")),
                 audioUrls = mapOf("default" to "http://audio.com/song2.mp3"),
                 coverUrls = mapOf("default" to "http://cover.com/cover2.jpg"),
@@ -86,5 +84,79 @@ open class SongControllerIntegrationTest : DescribeSpec() {
         }
     }
     }
+
+        describe("GET /api/v1/songs/{userId}/page") {
+            it("should return cursor-paginated songs and exclude non-SONG types") {
+                // 3 active SONG + 1 active SHORT + 1 inactive SONG
+                repeat(3) { idx ->
+                    songRepository.save(
+                        Song(
+                            artists = mapOf("default" to listOf("SongArtist ${idx + 1}")),
+                            audioUrls = mapOf("default" to "http://audio.com/s${idx + 1}.mp3"),
+                            coverUrls = mapOf("default" to "http://cover.com/s${idx + 1}.jpg"),
+                            title = "Song ${idx + 1}",
+                            active = true,
+                            createdBy = "system",
+                            modifiedBy = "system",
+                            type = "SONG"
+                        )
+                    )
+                }
+
+                songRepository.save(
+                    Song(
+                        artists = mapOf("default" to listOf("ShortArtist")),
+                        audioUrls = mapOf("default" to "http://audio.com/short.mp3"),
+                        coverUrls = mapOf("default" to "http://cover.com/short.jpg"),
+                        title = "Short 1",
+                        active = true,
+                        createdBy = "system",
+                        modifiedBy = "system",
+                        type = "SHORT"
+                    )
+                )
+
+                songRepository.save(
+                    Song(
+                        artists = mapOf("default" to listOf("InactiveArtist")),
+                        audioUrls = mapOf("default" to "http://audio.com/inactive.mp3"),
+                        coverUrls = mapOf("default" to "http://cover.com/inactive.jpg"),
+                        title = "Inactive Song",
+                        active = false,
+                        createdBy = "system",
+                        modifiedBy = "system",
+                        type = "SONG"
+                    )
+                )
+
+                val userId = java.util.UUID.randomUUID()
+
+                // First page
+                val first = mockMvc.perform(get("/api/v1/songs/{userId}/page", userId).param("limit", "2"))
+                    .andExpect(status().isOk)
+                    .andExpect(jsonPath("$.items").isArray)
+                    .andExpect(jsonPath("$.items.length()").value(2))
+                    .andExpect(jsonPath("$.hasNext").value(true))
+                    .andExpect(jsonPath("$.nextCursor").isString)
+                    .andReturn()
+
+                val firstJson = first.response.contentAsString
+                val cursorRegex = """"nextCursor"\s*:\s*"([^"]+)"""".toRegex()
+                val cursor = cursorRegex.find(firstJson)?.groupValues?.get(1)
+                cursor shouldBe cursor?.isNotBlank()
+
+                // Second page
+                mockMvc.perform(
+                    get("/api/v1/songs/{userId}/page", userId)
+                        .param("limit", "2")
+                        .param("cursor", cursor!!)
+                )
+                    .andExpect(status().isOk)
+                    .andExpect(jsonPath("$.items").isArray)
+                    .andExpect(jsonPath("$.items.length()").value(1))
+                    .andExpect(jsonPath("$.hasNext").value(false))
+                    .andExpect(jsonPath("$.nextCursor").doesNotExist())
+            }
+        }
 }
 

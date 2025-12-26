@@ -20,6 +20,33 @@ interface DislikeRepository : JpaRepository<Dislike, UUID> {
     @Query("SELECT COUNT(d) FROM Dislike d WHERE d.song.id = :songId AND d.revokedAt IS NULL")
     fun countBySongIdAndRevokedAtIsNull(@Param("songId") songId: UUID): Long
 
+    @Query(
+        """
+            SELECT d.song.id
+            FROM Dislike d
+            WHERE d.user.id = :userId
+              AND d.song.id IN :songIds
+              AND d.revokedAt IS NULL
+        """
+    )
+    fun findActiveDislikedSongIds(
+        @Param("userId") userId: UUID,
+        @Param("songIds") songIds: Collection<UUID>
+    ): List<UUID>
+
+    @Query(
+        """
+            SELECT d.song.id AS songId, COUNT(d) AS cnt
+            FROM Dislike d
+            WHERE d.song.id IN :songIds
+              AND d.revokedAt IS NULL
+            GROUP BY d.song.id
+        """
+    )
+    fun countActiveDislikesBySongIds(
+        @Param("songIds") songIds: Collection<UUID>
+    ): List<SongIdCountProjection>
+
     @Modifying
     @Query(
         value = "INSERT INTO music.dislikes (user_id, song_id, created_by) VALUES (:userId, :songId, :createdBy)",

@@ -20,6 +20,33 @@ interface LikeRepository : JpaRepository<Like, UUID> {
     @Query("SELECT COUNT(l) FROM Like l WHERE l.song.id = :songId AND l.revokedAt IS NULL")
     fun countBySongIdAndRevokedAtIsNull(@Param("songId") songId: UUID): Long
 
+    @Query(
+        """
+            SELECT l.song.id
+            FROM Like l
+            WHERE l.user.id = :userId
+              AND l.song.id IN :songIds
+              AND l.revokedAt IS NULL
+        """
+    )
+    fun findActiveLikedSongIds(
+        @Param("userId") userId: UUID,
+        @Param("songIds") songIds: Collection<UUID>
+    ): List<UUID>
+
+    @Query(
+        """
+            SELECT l.song.id AS songId, COUNT(l) AS cnt
+            FROM Like l
+            WHERE l.song.id IN :songIds
+              AND l.revokedAt IS NULL
+            GROUP BY l.song.id
+        """
+    )
+    fun countActiveLikesBySongIds(
+        @Param("songIds") songIds: Collection<UUID>
+    ): List<SongIdCountProjection>
+
     @Modifying
     @Query(
         value = "INSERT INTO music.likes (user_id, song_id, created_by) VALUES (:userId, :songId, :createdBy)",

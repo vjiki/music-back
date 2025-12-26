@@ -5,6 +5,72 @@ https://dashboard.render.com
 
 https://console.aiven.io/account/a572a07566bf/project/vjiki/services
 
+## API pagination (music-ios / music-ui)
+
+This backend supports **cursor-based pagination** for songs and shorts feeds. It’s designed for infinite scroll (stable ordering, no duplicate/skip between pages).
+
+### Songs pagination
+
+- **Endpoint**: `GET /api/v1/songs/{userId}/page`
+- **Query params**:
+  - `limit` (optional, default `20`, clamped to `1..100`)
+  - `cursor` (optional, opaque string returned by the previous page)
+
+Example:
+
+```http
+GET /api/v1/songs/00000000-0000-0000-0000-000000000000/page?limit=20
+GET /api/v1/songs/00000000-0000-0000-0000-000000000000/page?limit=20&cursor=ey4uLg
+```
+
+Response shape:
+
+```json
+{
+  "items": [ /* SongResponse[] */ ],
+  "nextCursor": "ey4uLg",
+  "hasNext": true
+}
+```
+
+Notes:
+- Songs pagination returns only records with `type = 'SONG'` and `active = true`.
+- Ordering is stable: `created_at DESC, id DESC` (keyset pagination).
+
+### Shorts pagination
+
+- **Endpoint**: `GET /api/v1/shorts/{userId}/page`
+- **Query params**:
+  - `limit` (optional, default `20`, clamped to `1..100`)
+  - `cursor` (optional, opaque string returned by the previous page)
+
+Example:
+
+```http
+GET /api/v1/shorts/00000000-0000-0000-0000-000000000000/page?limit=20
+GET /api/v1/shorts/00000000-0000-0000-0000-000000000000/page?limit=20&cursor=ey4uLg
+```
+
+Response shape:
+
+```json
+{
+  "items": [ /* ShortResponse[] */ ],
+  "nextCursor": "ey4uLg",
+  "hasNext": true
+}
+```
+
+Notes:
+- Shorts pagination returns **all active items** (songs + shorts) and each item includes `type`.
+- Ordering is stable: `created_at DESC, id DESC` (keyset pagination).
+
+### Backward compatibility
+
+The old endpoints still exist and return full lists:
+- `GET /api/v1/songs/{userId}`
+- `GET /api/v1/shorts/{userId}`
+
 
 
 
