@@ -31,5 +31,13 @@ COPY --from=builder /app/build/libs/*.jar app.jar
 # Expose port (Spring Boot default)
 EXPOSE 8080
 
+# Sensible JVM defaults for containers.
+# You can override any of these at deploy time by setting JAVA_TOOL_OPTIONS in your platform (Render).
+#
+# Notes:
+# - JDK 21 default GC is G1 already; keeping it explicit is fine.
+# - MaxRAMPercentage leaves headroom for non-heap (metaspace/native/threads).
+ENV JAVA_TOOL_OPTIONS="-XX:+UseG1GC -XX:MaxRAMPercentage=80 -XX:InitialRAMPercentage=20 -XX:+ExitOnOutOfMemoryError"
+
 # Run the app (Kotlin compiled to JVM bytecode runs the same way)
 ENTRYPOINT ["java", "-jar", "app.jar"]

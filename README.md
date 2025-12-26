@@ -71,6 +71,23 @@ The old endpoints still exist and return full lists:
 - `GET /api/v1/songs/{userId}`
 - `GET /api/v1/shorts/{userId}`
 
+## Memory / OOM notes (production)
+
+If you see **OutOfMemoryError** in production, GC tweaks alone usually won’t help unless the JVM is mis-sized for the container.
+
+Recommended actions:
+- Use the **`/page`** endpoints in FE instead of loading full lists.
+- In Render (or any container platform), set a memory limit that matches your dataset and traffic.
+- Override JVM sizing with `JAVA_TOOL_OPTIONS` if needed.
+
+Default container JVM flags are set in `Dockerfile` via `JAVA_TOOL_OPTIONS`:
+- `-XX:+UseG1GC`
+- `-XX:MaxRAMPercentage=65`
+- `-XX:InitialRAMPercentage=20`
+- `-XX:+ExitOnOutOfMemoryError`
+
+You can override them at deploy time (Render env var) if you want a larger/smaller heap or different GC.
+
 
 
 
