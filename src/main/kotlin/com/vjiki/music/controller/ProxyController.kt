@@ -85,7 +85,7 @@ class ProxyController {
                 
                 val headers = HttpHeaders()
                 headers.contentType = MediaType.parseMediaType(contentType)
-                headers.cacheControl = "public, max-age=3600" // Cache for 1 hour
+                headers.cacheControl = "public, max-age=30" // Cache for 30 seconds
                 headers.set("Accept-Ranges", "bytes") // Enable range requests for audio streaming
                 
                 ResponseEntity.ok()
