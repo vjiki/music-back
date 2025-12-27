@@ -37,7 +37,7 @@ EXPOSE 8080
 # Notes:
 # - JDK 21 default GC is G1 already; keeping it explicit is fine.
 # - MaxRAMPercentage leaves headroom for non-heap (metaspace/native/threads).
-ENV JAVA_TOOL_OPTIONS="-XX:+UseG1GC -XX:MaxRAMPercentage=80 -XX:InitialRAMPercentage=20 -XX:+ExitOnOutOfMemoryError"
+ENV JAVA_TOOL_OPTIONS="-XX:+UseG1GC -XX:MaxRAMPercentage=80 -XX:InitialRAMPercentage=40 -XX:+ExitOnOutOfMemoryError"
 
 # Run the app (Kotlin compiled to JVM bytecode runs the same way)
 ENTRYPOINT ["java", "-jar", "app.jar"]
