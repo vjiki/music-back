@@ -2,6 +2,8 @@ package com.vjiki.music.controller
 
 import com.vjiki.music.dto.AuthRequest
 import com.vjiki.music.dto.AuthResponse
+import com.vjiki.music.dto.AuthExistsResponse
+import com.vjiki.music.dto.RegisterRequest
 import com.vjiki.music.service.UserService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -23,6 +25,28 @@ class AuthController(
         } else {
             ResponseEntity.status(401).body(authResponse)
         }
+    }
+
+    /**
+     * Register a LOCAL user if it doesn't exist (by email).
+     * If user exists and password matches, returns existing userId.
+     */
+    @PostMapping("/register")
+    @CrossOrigin(origins = ["*"])
+    fun registerIfNotExists(@RequestBody request: RegisterRequest): ResponseEntity<AuthResponse> {
+        val response = userService.registerIfNotExists(request)
+        return ResponseEntity.ok(response)
+    }
+
+    /**
+     * Check whether user exists by email (for FE flows).
+     * Example: GET /api/v1/auth/exists?email=user@example.com
+     */
+    @GetMapping("/exists")
+    @CrossOrigin(origins = ["*"])
+    fun userExists(@RequestParam email: String): ResponseEntity<AuthExistsResponse> {
+        val response = userService.userExistsByEmail(email)
+        return ResponseEntity.ok(response)
     }
 }
 

@@ -36,60 +36,60 @@ open class SongControllerIntegrationTest : DescribeSpec() {
 
     init {
         describe("GET /api/v1/songs/{userId}") {
-            it("should return list of active songs") {
+        it("should return list of active songs") {
                 val song1 = songRepository.save(
                     Song(
-                        artists = mapOf("default" to listOf("Artist 1")),
-                        audioUrls = mapOf("default" to "http://audio.com/song1.mp3"),
-                        coverUrls = mapOf("default" to "http://cover.com/cover1.jpg"),
-                        title = "Song 1",
-                        active = true,
-                        createdBy = "system",
-                        modifiedBy = "system"
+                artists = mapOf("default" to listOf("Artist 1")),
+                audioUrls = mapOf("default" to "http://audio.com/song1.mp3"),
+                coverUrls = mapOf("default" to "http://cover.com/cover1.jpg"),
+                title = "Song 1",
+                active = true,
+                createdBy = "system",
+                modifiedBy = "system"
                     )
                 )
                 songRepository.save(
                     Song(
-                        artists = mapOf("default" to listOf("Artist 2")),
-                        audioUrls = mapOf("default" to "http://audio.com/song2.mp3"),
-                        coverUrls = mapOf("default" to "http://cover.com/cover2.jpg"),
-                        title = "Song 2",
-                        active = true,
-                        createdBy = "system",
-                        modifiedBy = "system"
+                artists = mapOf("default" to listOf("Artist 2")),
+                audioUrls = mapOf("default" to "http://audio.com/song2.mp3"),
+                coverUrls = mapOf("default" to "http://cover.com/cover2.jpg"),
+                title = "Song 2",
+                active = true,
+                createdBy = "system",
+                modifiedBy = "system"
                     )
                 )
                 songRepository.save(
                     Song(
-                        artists = mapOf("default" to listOf("Artist 3")),
-                        audioUrls = mapOf("default" to "http://audio.com/song3.mp3"),
-                        coverUrls = mapOf("default" to "http://cover.com/cover3.jpg"),
-                        title = "Song 3",
-                        active = false,
-                        createdBy = "system",
-                        modifiedBy = "system"
+                artists = mapOf("default" to listOf("Artist 3")),
+                audioUrls = mapOf("default" to "http://audio.com/song3.mp3"),
+                coverUrls = mapOf("default" to "http://cover.com/cover3.jpg"),
+                title = "Song 3",
+                active = false,
+                createdBy = "system",
+                modifiedBy = "system"
                     )
                 )
 
-                val userId = java.util.UUID.randomUUID()
+            val userId = java.util.UUID.randomUUID()
 
-                mockMvc.perform(get("/api/v1/songs/{userId}", userId))
-                    .andExpect(status().isOk)
-                    .andExpect(jsonPath("$").isArray)
-                    .andExpect(jsonPath("$.length()").value(2))
-                    .andExpect(jsonPath("$[0].title").exists())
-                    .andExpect(jsonPath("$[1].title").exists())
-            }
-
-            it("should return empty list when no active songs exist") {
-                val userId = java.util.UUID.randomUUID()
-
-                mockMvc.perform(get("/api/v1/songs/{userId}", userId))
-                    .andExpect(status().isOk)
-                    .andExpect(jsonPath("$").isArray)
-                    .andExpect(jsonPath("$.length()").value(0))
-            }
+            mockMvc.perform(get("/api/v1/songs/{userId}", userId))
+                .andExpect(status().isOk)
+                .andExpect(jsonPath("$").isArray)
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].title").exists())
+                .andExpect(jsonPath("$[1].title").exists())
         }
+
+        it("should return empty list when no active songs exist") {
+            val userId = java.util.UUID.randomUUID()
+
+            mockMvc.perform(get("/api/v1/songs/{userId}", userId))
+                .andExpect(status().isOk)
+                .andExpect(jsonPath("$").isArray)
+                .andExpect(jsonPath("$.length()").value(0))
+        }
+    }
 
         describe("GET /api/v1/songs/{userId}/page") {
             it("should return cursor-paginated songs and exclude non-SONG types") {
