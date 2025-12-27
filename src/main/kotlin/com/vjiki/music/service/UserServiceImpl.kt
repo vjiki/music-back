@@ -6,7 +6,6 @@ import com.vjiki.music.dto.AuthExistsResponse
 import com.vjiki.music.dto.RegisterRequest
 import com.vjiki.music.dto.UserResponse
 import com.vjiki.music.entity.AuthProvider
-import com.vjiki.music.entity.User
 import com.vjiki.music.mapper.UserMapper.toResponse
 import com.vjiki.music.repository.PlaylistRepository
 import com.vjiki.music.repository.UserRepository
@@ -49,7 +48,7 @@ class UserServiceImpl(
                 return AuthResponse(false, null, "Invalid email or password")
             }
         } else {
-            return AuthResponse(false, null, "This account uses OAuth authentication")
+        return AuthResponse(false, null, "This account uses OAuth authentication")
         }
 
         return AuthResponse(true, user.id, "Authentication successful")
@@ -59,9 +58,12 @@ class UserServiceImpl(
     override fun registerIfNotExists(request: RegisterRequest): AuthResponse {
         val email = request.email.trim().lowercase()
         val password = request.password?.trim()?.takeIf { it.isNotBlank() }
+        val provider = runCatching { AuthProvider.valueOf(request.provider?.trim()?.uppercase() ?: AuthProvider.LOCAL.name) }
+            .getOrElse { throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid provider") }
+        val providerId = request.providerId?.trim()?.takeIf { it.isNotBlank() }
 
         if (email.isBlank()) throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Email is required")
-        if (password != null && password.length < 6) {
+        if (provider == AuthProvider.LOCAL && password != null && password.length < 6) {
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Password must be at least 6 characters")
         }
 
@@ -71,7 +73,7 @@ class UserServiceImpl(
             // Silent-idempotent:
             // - Always return 200 + userId if email exists
             // - If password is provided and LOCAL user has no password, set it (native UPDATE)
-            if (password != null && existing.provider == AuthProvider.LOCAL.name && existing.passwordHash.isNullOrBlank()) {
+            if (provider == AuthProvider.LOCAL && password != null && existing.provider == AuthProvider.LOCAL.name && existing.passwordHash.isNullOrBlank()) {
                 userRepository.setPasswordIfMissing(existing.id, passwordEncoder.encode(password))
                 userRoleRepository.insertRoleIfMissing(existing.id, "USER")
                 ensureDefaultPlaylists(existing.id)
@@ -89,9 +91,11 @@ class UserServiceImpl(
             ?.take(100)
             ?: email.substringBefore("@").take(100).ifBlank { "user" }
 
-        val savedId = userRepository.upsertLocalUserReturnId(
+        val savedId = userRepository.upsertUserReturnId(
             email = email,
-            passwordHash = password?.let { passwordEncoder.encode(it) },
+            passwordHash = if (provider == AuthProvider.LOCAL) password?.let { passwordEncoder.encode(it) } else null,
+            provider = provider.name,
+            providerId = if (provider == AuthProvider.LOCAL) null else providerId,
             nickname = nickname,
             avatarUrl = request.avatarUrl?.trim()?.takeIf { it.isNotBlank() }
         )
@@ -123,15 +127,16 @@ class UserServiceImpl(
         )
     }
 
-    override fun userExistsByEmail(email: String): AuthExistsResponse {
+    override fun userExistsByEmail(email: String, provider: String?): AuthExistsResponse {
         val normalized = email.trim().lowercase()
         if (normalized.isBlank()) throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Email is required")
 
-        val user = userRepository.findByEmail(normalized).orElse(null)
-        return if (user != null) {
-            AuthExistsResponse(exists = true, userId = user.id)
+        val providerFilter = provider?.trim()?.takeIf { it.isNotBlank() }?.uppercase()
+        val info = userRepository.findRegisterInfoByEmailNative(normalized)
+        return if (info != null && (providerFilter == null || info.provider.uppercase() == providerFilter)) {
+            AuthExistsResponse(exists = true, userId = info.id, provider = info.provider)
         } else {
-            AuthExistsResponse(exists = false, userId = null)
+            AuthExistsResponse(exists = false, userId = null, provider = null)
         }
     }
 }

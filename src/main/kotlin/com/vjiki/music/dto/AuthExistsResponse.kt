@@ -4,7 +4,8 @@ import java.util.UUID
 
 data class AuthExistsResponse(
     val exists: Boolean,
-    val userId: UUID? = null
+    val userId: UUID? = null,
+    val provider: String? = null
 )
 
 

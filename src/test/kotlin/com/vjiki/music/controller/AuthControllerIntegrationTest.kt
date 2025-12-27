@@ -207,6 +207,22 @@ open class AuthControllerIntegrationTest : DescribeSpec() {
                     .andExpect(status().isOk)
                     .andExpect(jsonPath("$.exists").value(false))
                     .andExpect(jsonPath("$.userId").doesNotExist())
+                    .andExpect(jsonPath("$.provider").doesNotExist())
+            }
+
+            it("should return exists=false when provider filter does not match") {
+                val email = "local@example.com"
+                mockMvc.perform(
+                    post("/api/v1/auth/register")
+                        .contentType("application/json")
+                        .content("""{ "email": "$email", "password": "secret123" }""")
+                )
+                    .andExpect(status().isOk)
+                    .andExpect(jsonPath("$.authenticated").value(true))
+
+                mockMvc.perform(get("/api/v1/auth/exists").param("email", email).param("provider", "GOOGLE"))
+                    .andExpect(status().isOk)
+                    .andExpect(jsonPath("$.exists").value(false))
             }
         }
     }

@@ -11,6 +11,6 @@ interface UserService {
     fun getUserById(userId: UUID): UserResponse
     fun authenticate(authRequest: AuthRequest): AuthResponse
     fun registerIfNotExists(request: RegisterRequest): AuthResponse
-    fun userExistsByEmail(email: String): AuthExistsResponse
+    fun userExistsByEmail(email: String, provider: String? = null): AuthExistsResponse
 }
 

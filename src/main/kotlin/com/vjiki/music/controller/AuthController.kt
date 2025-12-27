@@ -41,11 +41,15 @@ class AuthController(
     /**
      * Check whether user exists by email (for FE flows).
      * Example: GET /api/v1/auth/exists?email=user@example.com
+     * Provider-specific check: GET /api/v1/auth/exists?email=user@example.com&provider=GOOGLE
      */
     @GetMapping("/exists")
     @CrossOrigin(origins = ["*"])
-    fun userExists(@RequestParam email: String): ResponseEntity<AuthExistsResponse> {
-        val response = userService.userExistsByEmail(email)
+    fun userExists(
+        @RequestParam email: String,
+        @RequestParam(required = false) provider: String?
+    ): ResponseEntity<AuthExistsResponse> {
+        val response = userService.userExistsByEmail(email, provider)
         return ResponseEntity.ok(response)
     }
 }

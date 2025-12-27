@@ -16,6 +16,7 @@ interface UserRepository : JpaRepository<User, UUID> {
     interface RegisterInfoProjection {
         val id: UUID
         val provider: String
+        val providerId: String?
         val passwordHash: String?
     }
 
@@ -23,6 +24,7 @@ interface UserRepository : JpaRepository<User, UUID> {
         value = """
             SELECT u.id                         AS id,
                    u.provider                   AS provider,
+                   u.provider_id                AS providerId,
                    u.password_hash              AS passwordHash
             FROM music.users u
             WHERE u.email = :email
@@ -33,7 +35,7 @@ interface UserRepository : JpaRepository<User, UUID> {
     fun findRegisterInfoByEmailNative(@Param("email") email: String): RegisterInfoProjection?
 
     /**
-     * Creates a LOCAL user if missing, otherwise returns existing id (idempotent).
+     * Creates a user if missing, otherwise returns existing id (idempotent).
      * Uses ON CONFLICT(email) to handle races.
      */
     @Query(
@@ -53,8 +55,8 @@ interface UserRepository : JpaRepository<User, UUID> {
             ) VALUES (
                 :email,
                 :passwordHash,
-                'LOCAL',
-                NULL,
+                :provider,
+                :providerId,
                 :nickname,
                 :avatarUrl,
                 'USER',
@@ -69,9 +71,11 @@ interface UserRepository : JpaRepository<User, UUID> {
         """,
         nativeQuery = true
     )
-    fun upsertLocalUserReturnId(
+    fun upsertUserReturnId(
         @Param("email") email: String,
         @Param("passwordHash") passwordHash: String?,
+        @Param("provider") provider: String,
+        @Param("providerId") providerId: String?,
         @Param("nickname") nickname: String,
         @Param("avatarUrl") avatarUrl: String?
     ): UUID
