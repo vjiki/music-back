@@ -1,5 +1,6 @@
 package com.vjiki.music.service
 
+import com.google.firebase.auth.FirebaseAuth
 import com.vjiki.music.dto.AuthRequest
 import com.vjiki.music.dto.AuthResponse
 import com.vjiki.music.dto.AuthExistsResponse
@@ -11,6 +12,8 @@ import com.vjiki.music.repository.PlaylistRepository
 import com.vjiki.music.repository.UserRepository
 import com.vjiki.music.repository.UserRoleRepository
 import org.springframework.http.HttpStatus
+import org.springframework.beans.factory.ObjectProvider
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -22,7 +25,10 @@ class UserServiceImpl(
     private val userRepository: UserRepository,
     private val userRoleRepository: UserRoleRepository,
     private val playlistRepository: PlaylistRepository,
-    private val passwordEncoder: PasswordEncoder
+    private val passwordEncoder: PasswordEncoder,
+    private val firebaseAuthProvider: ObjectProvider<FirebaseAuth>,
+    @Value("\${auth.local.enabled:true}")
+    private val localAuthEnabled: Boolean
 ) : UserService {
 
     override fun getUserById(userId: UUID): UserResponse {
@@ -32,6 +38,11 @@ class UserServiceImpl(
     }
 
     override fun authenticate(authRequest: AuthRequest): AuthResponse {
+        if (!localAuthEnabled) {
+            // In production deployments we only allow Firebase Auth.
+            return AuthResponse(false, null, "Local authentication is disabled")
+        }
+
         val user = userRepository.findByEmail(authRequest.email)
             .orElse(null) ?: return AuthResponse(false, null, "Invalid email or password")
 
@@ -54,8 +65,41 @@ class UserServiceImpl(
         return AuthResponse(true, user.id, "Authentication successful")
     }
 
+    override fun authenticateFirebase(idToken: String): AuthResponse {
+        val fa = firebaseAuthProvider.ifAvailable ?: return AuthResponse(false, null, "Firebase auth is not enabled")
+        return try {
+            val decoded = fa.verifyIdToken(idToken)
+            val email = decoded.email?.trim()?.lowercase()
+                ?: return AuthResponse(false, null, "Firebase token has no email")
+
+            val nickname = (decoded.name ?: email.substringBefore("@")).take(100).ifBlank { "user" }
+            val avatarUrl = decoded.picture?.trim()?.takeIf { it.isNotBlank() }
+
+            val userId = userRepository.upsertUserReturnId(
+                email = email,
+                passwordHash = null,
+                provider = AuthProvider.GOOGLE.name,
+                providerId = decoded.uid,
+                nickname = nickname,
+                avatarUrl = avatarUrl
+            )
+
+            userRoleRepository.insertRoleIfMissing(userId, "USER")
+            ensureDefaultPlaylists(userId)
+
+            AuthResponse(true, userId, "Authentication successful")
+        } catch (_: Exception) {
+            AuthResponse(false, null, "Invalid Firebase token")
+        }
+    }
+
     @Transactional
     override fun registerIfNotExists(request: RegisterRequest): AuthResponse {
+        // Local users are dev-only. In production, require Firebase flow (/auth/firebase) for provisioning.
+        if (!localAuthEnabled) {
+            throw ResponseStatusException(HttpStatus.FORBIDDEN, "Local registration is disabled")
+        }
+
         val email = request.email.trim().lowercase()
         val password = request.password?.trim()?.takeIf { it.isNotBlank() }
         val provider = runCatching { AuthProvider.valueOf(request.provider?.trim()?.uppercase() ?: AuthProvider.LOCAL.name) }
@@ -65,6 +109,12 @@ class UserServiceImpl(
         if (email.isBlank()) throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Email is required")
         if (provider == AuthProvider.LOCAL && password != null && password.length < 6) {
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Password must be at least 6 characters")
+        }
+
+        // When local registration is enabled, we only support LOCAL here.
+        // OAuth users must be provisioned via verified Firebase token (/auth/firebase) to avoid spoofing.
+        if (provider != AuthProvider.LOCAL) {
+            throw ResponseStatusException(HttpStatus.FORBIDDEN, "OAuth registration is disabled for this endpoint. Use /api/v1/auth/firebase")
         }
 
         // Native SELECT (no Hibernate merge/persist involved)

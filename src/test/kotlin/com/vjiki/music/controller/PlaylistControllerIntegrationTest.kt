@@ -10,11 +10,11 @@ import com.vjiki.music.repository.UserRepository
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.extensions.spring.SpringExtension
-import io.kotest.matchers.shouldBe
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
@@ -76,7 +76,7 @@ open class PlaylistControllerIntegrationTest : DescribeSpec() {
             val user = createTestUser()
             val playlist = createPlaylist(user, "Test Playlist")
 
-            mockMvc.perform(get("/api/v1/playlists/user/${user.id}"))
+            mockMvc.perform(get("/api/v1/playlists/user/${user.id}").with(user("test").roles("USER")))
                 .andExpect(status().isOk)
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$[0].id").value(playlist.id.toString()))
@@ -87,7 +87,7 @@ open class PlaylistControllerIntegrationTest : DescribeSpec() {
         it("should return empty list when user has no playlists") {
             val user = createTestUser()
 
-            mockMvc.perform(get("/api/v1/playlists/user/${user.id}"))
+            mockMvc.perform(get("/api/v1/playlists/user/${user.id}").with(user("test").roles("USER")))
                 .andExpect(status().isOk)
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$").isEmpty)
@@ -97,7 +97,7 @@ open class PlaylistControllerIntegrationTest : DescribeSpec() {
             val user = createTestUser()
             val playlist = createPlaylist(user, "My Playlist")
 
-            mockMvc.perform(get("/api/v1/playlists/${playlist.id}"))
+            mockMvc.perform(get("/api/v1/playlists/${playlist.id}").with(user("test").roles("USER")))
                 .andExpect(status().isOk)
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.id").value(playlist.id.toString()))
@@ -108,7 +108,7 @@ open class PlaylistControllerIntegrationTest : DescribeSpec() {
         it("should return 500 when playlist not found") {
             val nonExistentId = UUID.randomUUID()
 
-            mockMvc.perform(get("/api/v1/playlists/$nonExistentId"))
+            mockMvc.perform(get("/api/v1/playlists/$nonExistentId").with(user("test").roles("USER")))
                 .andExpect(status().is5xxServerError)
         }
     }

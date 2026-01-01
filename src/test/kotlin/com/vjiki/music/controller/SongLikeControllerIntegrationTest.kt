@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
@@ -72,6 +73,7 @@ open class SongLikeControllerIntegrationTest : DescribeSpec() {
                 post("/api/v1/songs/{songId}/like", song.id)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request))
+                    .with(user("test").roles("USER"))
             )
                 .andExpect(status().isOk)
 
@@ -107,6 +109,7 @@ open class SongLikeControllerIntegrationTest : DescribeSpec() {
                 post("/api/v1/songs/{songId}/dislike", song.id)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request))
+                    .with(user("test").roles("USER"))
             )
                 .andExpect(status().isOk)
 
@@ -145,6 +148,7 @@ open class SongLikeControllerIntegrationTest : DescribeSpec() {
             mockMvc.perform(
                 get("/api/v1/songs/{songId}/like-info", song.id)
                     .param("userId", user.id.toString())
+                    .with(user("test").roles("USER"))
             )
                 .andExpect(status().isOk)
                 .andExpect(jsonPath("$.isLiked").value(true))

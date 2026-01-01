@@ -21,6 +21,12 @@ interface UserRoleRepository : JpaRepository<UserRole, UserRoleId> {
         @Param("userId") userId: UUID,
         @Param("role") role: String
     )
+
+    @Query(
+        value = "SELECT role FROM music.user_roles WHERE user_id = :userId",
+        nativeQuery = true
+    )
+    fun findRolesByUserId(@Param("userId") userId: UUID): List<String>
 }
 
 

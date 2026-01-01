@@ -27,7 +27,7 @@ Response shape:
 
 ```json
 {
-  "items": [ /* SongResponse[] */ ],
+  "items": [ ],
   "nextCursor": "ey4uLg",
   "hasNext": true
 }
@@ -55,7 +55,7 @@ Response shape:
 
 ```json
 {
-  "items": [ /* ShortResponse[] */ ],
+  "items": [ ],
   "nextCursor": "ey4uLg",
   "hasNext": true
 }
@@ -70,6 +70,59 @@ Notes:
 The old endpoints still exist and return full lists:
 - `GET /api/v1/songs/{userId}`
 - `GET /api/v1/shorts/{userId}`
+
+## Security (Firebase Auth + HTTPS)
+
+### Firebase Auth (Option A)
+
+This backend can verify **Firebase ID tokens** and auto-provision a user in DB (provider `GOOGLE`) + default role/playlists.
+
+#### Enable Firebase
+
+Set environment variables:
+- `FIREBASE_ENABLED=true`
+- One of:
+  - `FIREBASE_SERVICE_ACCOUNT_JSON` (raw JSON)
+  - `FIREBASE_SERVICE_ACCOUNT_JSON_BASE64` (base64 JSON)
+
+#### Authenticate with Firebase token
+
+`POST /api/v1/auth/firebase`
+
+Body:
+```json
+{ "idToken": "<firebase-id-token>" }
+```
+
+On success, you get standard `AuthResponse`:
+```json
+{ "authenticated": true, "userId": "<uuid>", "message": "Authentication successful" }
+```
+
+#### Protecting endpoints
+
+When Firebase is enabled, non-auth endpoints require:
+- `Authorization: Bearer <firebase-id-token>`
+
+### Disable LOCAL auth in production
+
+To ensure email/password users are **not authorized in deployments**, set:
+- `LOCAL_AUTH_ENABLED=false`
+
+Effects:
+- `POST /api/v1/auth/authenticate` will always return `authenticated=false`
+- `POST /api/v1/auth/register` will return `403` (use Firebase `/api/v1/auth/firebase` instead)
+
+### HTTPS everywhere
+
+This service is intended to run **behind a TLS-terminating proxy** (Render/Cloudflare/etc).
+
+To enforce HTTPS at the Spring layer (based on `X-Forwarded-Proto`):
+- `REQUIRE_HTTPS=true`
+
+Notes:
+- `server.forward-headers-strategy=framework` is already set.
+- Enable HSTS only when you are certain all traffic is HTTPS.
 
 ## Memory / OOM notes (production)
 

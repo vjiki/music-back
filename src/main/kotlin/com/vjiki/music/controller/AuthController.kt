@@ -3,6 +3,7 @@ package com.vjiki.music.controller
 import com.vjiki.music.dto.AuthRequest
 import com.vjiki.music.dto.AuthResponse
 import com.vjiki.music.dto.AuthExistsResponse
+import com.vjiki.music.dto.FirebaseAuthRequest
 import com.vjiki.music.dto.RegisterRequest
 import com.vjiki.music.service.UserService
 import org.springframework.http.ResponseEntity
@@ -20,6 +21,21 @@ class AuthController(
     fun authenticate(@RequestBody authRequest: AuthRequest): ResponseEntity<AuthResponse> {
         val authResponse = userService.authenticate(authRequest)
 
+        return if (authResponse.authenticated) {
+            ResponseEntity.ok(authResponse)
+        } else {
+            ResponseEntity.status(401).body(authResponse)
+        }
+    }
+
+    /**
+     * Firebase Auth login: verifies Firebase ID token and returns userId.
+     * Requires FIREBASE_ENABLED=true and service account credentials env vars.
+     */
+    @PostMapping("/firebase")
+    @CrossOrigin(origins = ["*"])
+    fun authenticateFirebase(@RequestBody request: FirebaseAuthRequest): ResponseEntity<AuthResponse> {
+        val authResponse = userService.authenticateFirebase(request.idToken)
         return if (authResponse.authenticated) {
             ResponseEntity.ok(authResponse)
         } else {

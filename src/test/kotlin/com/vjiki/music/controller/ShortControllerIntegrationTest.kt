@@ -10,6 +10,7 @@ import io.kotest.matchers.shouldNotBe
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
@@ -79,7 +80,11 @@ open class ShortControllerIntegrationTest : DescribeSpec() {
 
                 val userId = java.util.UUID.randomUUID()
 
-                val first = mockMvc.perform(get("/api/v1/shorts/{userId}/page", userId).param("limit", "3"))
+                val first = mockMvc.perform(
+                    get("/api/v1/shorts/{userId}/page", userId)
+                        .param("limit", "3")
+                        .with(user("test").roles("USER"))
+                )
                     .andExpect(status().isOk)
                     .andExpect(jsonPath("$.items").isArray)
                     .andExpect(jsonPath("$.items.length()").value(3))
@@ -98,6 +103,7 @@ open class ShortControllerIntegrationTest : DescribeSpec() {
                     get("/api/v1/shorts/{userId}/page", userId)
                         .param("limit", "3")
                         .param("cursor", cursor!!)
+                        .with(user("test").roles("USER"))
                 )
                     .andExpect(status().isOk)
                     .andExpect(jsonPath("$.items").isArray)

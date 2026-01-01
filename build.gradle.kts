@@ -46,6 +46,9 @@ dependencies {
 	
 	// Database
 	runtimeOnly("org.postgresql:postgresql")
+
+	// Firebase (verify Firebase ID tokens)
+	implementation("com.google.firebase:firebase-admin:9.7.0")
 	
 	// Testing
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
