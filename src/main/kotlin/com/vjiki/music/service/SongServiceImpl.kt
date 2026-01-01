@@ -27,7 +27,6 @@ class SongServiceImpl(
         val tagsBySongId = tagLookupService.getTagsByTrackIds(songIds)
         val likedIds = likeRepository.findActiveLikedSongIds(userId, songIds).toSet()
         val dislikedIds = dislikeRepository.findActiveDislikedSongIds(userId, songIds).toSet()
-
         val likesCounts = likeRepository.countActiveLikesBySongIds(songIds).associate { it.songId to it.cnt }
         val dislikesCounts = dislikeRepository.countActiveDislikesBySongIds(songIds).associate { it.songId to it.cnt }
 
@@ -63,17 +62,8 @@ class SongServiceImpl(
         val tagsBySongId = tagLookupService.getTagsByTrackIds(songIds)
         val likedIds = if (songIds.isEmpty()) emptySet() else likeRepository.findActiveLikedSongIds(userId, songIds).toSet()
         val dislikedIds = if (songIds.isEmpty()) emptySet() else dislikeRepository.findActiveDislikedSongIds(userId, songIds).toSet()
-
-        val likesCounts = if (songIds.isEmpty()) {
-            emptyMap()
-        } else {
-            likeRepository.countActiveLikesBySongIds(songIds).associate { it.songId to it.cnt }
-        }
-        val dislikesCounts = if (songIds.isEmpty()) {
-            emptyMap()
-        } else {
-            dislikeRepository.countActiveDislikesBySongIds(songIds).associate { it.songId to it.cnt }
-        }
+        val likesCounts = if (songIds.isEmpty()) emptyMap() else likeRepository.countActiveLikesBySongIds(songIds).associate { it.songId to it.cnt }
+        val dislikesCounts = if (songIds.isEmpty()) emptyMap() else dislikeRepository.countActiveDislikesBySongIds(songIds).associate { it.songId to it.cnt }
 
         val items = slice.map { song ->
             song.toResponse(

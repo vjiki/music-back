@@ -17,6 +17,11 @@ interface TrackTagRepository : JpaRepository<TrackTag, TrackTagId> {
         val weight: Double
     }
 
+    interface TrackTagsJsonProjection {
+        val trackId: UUID
+        val tags: String
+    }
+
     @Query(
         value = """
             SELECT
@@ -31,6 +36,26 @@ interface TrackTagRepository : JpaRepository<TrackTag, TrackTagId> {
         nativeQuery = true
     )
     fun findTagsByTrackIds(@Param("trackIds") trackIds: Collection<UUID>): List<TrackTagProjection>
+
+    @Query(
+        value = """
+            SELECT
+                tt.track_id AS trackId,
+                COALESCE(
+                    jsonb_agg(
+                        jsonb_build_object('name', t.name, 'weight', tt.weight)
+                        ORDER BY tt.weight DESC
+                    ),
+                    '[]'::jsonb
+                )::text AS tags
+            FROM music.track_tag tt
+            JOIN music.tag t ON t.id = tt.tag_id
+            WHERE tt.track_id IN (:trackIds)
+            GROUP BY tt.track_id
+        """,
+        nativeQuery = true
+    )
+    fun findTagsJsonByTrackIds(@Param("trackIds") trackIds: Collection<UUID>): List<TrackTagsJsonProjection>
 }
 
 
