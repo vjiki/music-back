@@ -13,7 +13,8 @@ import java.util.UUID
 @Service
 class PlaylistServiceImpl(
     private val playlistRepository: PlaylistRepository,
-    private val playlistSongRepository: PlaylistSongRepository
+    private val playlistSongRepository: PlaylistSongRepository,
+    private val tagLookupService: TagLookupService
 ) : PlaylistService {
 
     override fun getPlaylistsByUserId(userId: UUID): List<PlaylistResponse> {
@@ -24,8 +25,14 @@ class PlaylistServiceImpl(
         val playlist = playlistRepository.findById(playlistId)
             .orElseThrow { IllegalArgumentException("Playlist not found: $playlistId") }
 
-        val songs = playlistSongRepository.findByPlaylistIdWithSong(playlistId)
-            .map { it.playlistSongToResponse() }
+        val playlistSongs = playlistSongRepository.findByPlaylistIdWithSong(playlistId)
+        val songs = playlistSongs.map { it.playlistSongToResponse() }
+
+        val songIds = playlistSongs.map { it.song.id }
+        val tagsBySongId = tagLookupService.getTagsByTrackIds(songIds)
+        val songsWithTags = songs.map { ps ->
+            ps.copy(tags = tagsBySongId[ps.songId] ?: emptyList())
+        }
 
         val playlistResponse = playlist.toResponse()
 
@@ -41,7 +48,7 @@ class PlaylistServiceImpl(
             isPublic = playlistResponse.isPublic,
             createdAt = playlistResponse.createdAt,
             modifiedAt = playlistResponse.modifiedAt,
-            songs = songs
+            songs = songsWithTags
         )
     }
 }

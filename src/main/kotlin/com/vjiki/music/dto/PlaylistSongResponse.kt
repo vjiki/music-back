@@ -11,6 +11,7 @@ data class PlaylistSongResponse(
     val songArtist: String?,
     val songAudioUrl: String?,
     val songCoverUrl: String?,
+    val tags: List<TagResponse> = emptyList(),
     val position: Int,
     val addedAt: OffsetDateTime?,
     val addedBy: UUID?

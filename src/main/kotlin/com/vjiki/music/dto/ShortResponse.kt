@@ -12,6 +12,7 @@ data class ShortResponse(
     @JsonProperty("video_url")
     val videoUrl: String?,
     val type: String,
+    val tags: List<TagResponse> = emptyList(),
     val isLiked: Boolean = false,
     val isDisliked: Boolean = false,
     val likesCount: Long = 0L,

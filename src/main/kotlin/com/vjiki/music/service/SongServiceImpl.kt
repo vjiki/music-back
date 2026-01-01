@@ -15,7 +15,8 @@ import java.util.UUID
 class SongServiceImpl(
     private val songRepository: SongRepository,
     private val likeRepository: LikeRepository,
-    private val dislikeRepository: DislikeRepository
+    private val dislikeRepository: DislikeRepository,
+    private val tagLookupService: TagLookupService
 ) : SongService {
 
     override fun getSongs(userId: UUID): List<SongResponse> {
@@ -23,6 +24,7 @@ class SongServiceImpl(
         if (songs.isEmpty()) return emptyList()
 
         val songIds = songs.map { it.id }
+        val tagsBySongId = tagLookupService.getTagsByTrackIds(songIds)
         val likedIds = likeRepository.findActiveLikedSongIds(userId, songIds).toSet()
         val dislikedIds = dislikeRepository.findActiveDislikedSongIds(userId, songIds).toSet()
 
@@ -35,7 +37,7 @@ class SongServiceImpl(
                 isDisliked = dislikedIds.contains(song.id),
                 likesCount = likesCounts[song.id] ?: 0L,
                 dislikesCount = dislikesCounts[song.id] ?: 0L
-            )
+            ).copy(tags = tagsBySongId[song.id] ?: emptyList())
         }
     }
 
@@ -58,6 +60,7 @@ class SongServiceImpl(
         val slice = if (hasNext) songs.take(safeLimit) else songs
 
         val songIds = slice.map { it.id }
+        val tagsBySongId = tagLookupService.getTagsByTrackIds(songIds)
         val likedIds = if (songIds.isEmpty()) emptySet() else likeRepository.findActiveLikedSongIds(userId, songIds).toSet()
         val dislikedIds = if (songIds.isEmpty()) emptySet() else dislikeRepository.findActiveDislikedSongIds(userId, songIds).toSet()
 
@@ -78,7 +81,7 @@ class SongServiceImpl(
                 isDisliked = dislikedIds.contains(song.id),
                 likesCount = likesCounts[song.id] ?: 0L,
                 dislikesCount = dislikesCounts[song.id] ?: 0L
-            )
+            ).copy(tags = tagsBySongId[song.id] ?: emptyList())
         }
 
         val last = slice.lastOrNull()
