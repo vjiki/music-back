@@ -56,6 +56,23 @@ interface TrackTagRepository : JpaRepository<TrackTag, TrackTagId> {
         nativeQuery = true
     )
     fun findTagsJsonByTrackIds(@Param("trackIds") trackIds: Collection<UUID>): List<TrackTagsJsonProjection>
+
+    @Query(
+        value = """
+            INSERT INTO music.track_tag (track_id, tag_id, weight, source)
+            VALUES (:trackId, :tagId, :weight, :source)
+            ON CONFLICT (track_id, tag_id) DO UPDATE
+            SET weight = EXCLUDED.weight,
+                source = EXCLUDED.source
+        """,
+        nativeQuery = true
+    )
+    fun upsertTrackTag(
+        @Param("trackId") trackId: UUID,
+        @Param("tagId") tagId: UUID,
+        @Param("weight") weight: Double,
+        @Param("source") source: String
+    )
 }
 
 

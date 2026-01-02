@@ -79,6 +79,8 @@ class SecurityConfig {
                         if (permitAll) {
                             anyRequest().permitAll()
                         } else {
+                            // Admin API
+                            requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                             anyRequest().authenticated()
                         }
                     }
