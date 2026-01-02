@@ -83,5 +83,77 @@ interface SongRepository : JpaRepository<Song, UUID> {
         @Param("cursorId") cursorId: UUID,
         pageable: Pageable
     ): List<Song>
+
+    // =========================
+    // Search (SONG only)
+    // Matches: title OR artists (jsonb array) OR tag.name via track_tag
+    // Cursor-based pagination: created_at DESC, id DESC
+    // =========================
+
+    @Query(
+        value = """
+            SELECT *
+            FROM music.songs s
+            WHERE s.active = true
+              AND s.type = 'SONG'
+              AND (
+                s.title ILIKE ('%' || :q || '%')
+                OR EXISTS (
+                  SELECT 1
+                  FROM jsonb_array_elements_text(s.artists->'default') a
+                  WHERE a ILIKE ('%' || :q || '%')
+                )
+                OR EXISTS (
+                  SELECT 1
+                  FROM music.track_tag tt
+                  JOIN music.tag t ON t.id = tt.tag_id
+                  WHERE tt.track_id = s.id
+                    AND t.name ILIKE ('%' || :q || '%')
+                )
+              )
+            ORDER BY s.created_at DESC, s.id DESC
+        """,
+        nativeQuery = true
+    )
+    fun searchSongsFirst(
+        @Param("q") q: String,
+        pageable: Pageable
+    ): List<Song>
+
+    @Query(
+        value = """
+            SELECT *
+            FROM music.songs s
+            WHERE s.active = true
+              AND s.type = 'SONG'
+              AND (
+                s.title ILIKE ('%' || :q || '%')
+                OR EXISTS (
+                  SELECT 1
+                  FROM jsonb_array_elements_text(s.artists->'default') a
+                  WHERE a ILIKE ('%' || :q || '%')
+                )
+                OR EXISTS (
+                  SELECT 1
+                  FROM music.track_tag tt
+                  JOIN music.tag t ON t.id = tt.tag_id
+                  WHERE tt.track_id = s.id
+                    AND t.name ILIKE ('%' || :q || '%')
+                )
+              )
+              AND (
+                s.created_at < :cursorCreatedAt
+                OR (s.created_at = :cursorCreatedAt AND s.id < :cursorId)
+              )
+            ORDER BY s.created_at DESC, s.id DESC
+        """,
+        nativeQuery = true
+    )
+    fun searchSongsAfter(
+        @Param("q") q: String,
+        @Param("cursorCreatedAt") cursorCreatedAt: OffsetDateTime,
+        @Param("cursorId") cursorId: UUID,
+        pageable: Pageable
+    ): List<Song>
 }
 
