@@ -1,0 +1,508 @@
+{
+	"info": {
+		"name": "Comments API",
+		"description": "Postman collection for testing Comments API endpoints",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "trackId",
+			"value": "550e8400-e29b-41d4-a716-446655440000",
+			"type": "string"
+		},
+		{
+			"key": "userId",
+			"value": "123e4567-e89b-12d3-a456-426614174000",
+			"type": "string"
+		},
+		{
+			"key": "commentId",
+			"value": "789e4567-e89b-12d3-a456-426614174111",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "Add Top-Level Comment",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"trackId\": \"{{trackId}}\",\n  \"userId\": \"{{userId}}\",\n  \"content\": \"This is a great track! Love the melody.\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/v1/comments",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"comments"
+					]
+				},
+				"description": "Add a top-level comment to a track. This creates a new comment without a parent."
+			},
+			"response": []
+		},
+		{
+			"name": "Add Reply (Nested Comment)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"trackId\": \"{{trackId}}\",\n  \"userId\": \"{{userId}}\",\n  \"content\": \"I totally agree! The production is amazing.\",\n  \"parentId\": \"789e4567-e89b-12d3-a456-426614174111\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/v1/comments",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"comments"
+					]
+				},
+				"description": "Add a reply to an existing comment. The parentId must be a valid comment ID that belongs to the same track."
+			},
+			"response": []
+		},
+		{
+			"name": "Get Comments for Track (Without User Context)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/v1/comments/track/{{trackId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"comments",
+						"track",
+						"{{trackId}}"
+					]
+				},
+				"description": "Get all comments for a track. Returns top-level comments with nested replies. The is_liked field will be false for all comments."
+			},
+			"response": []
+		},
+		{
+			"name": "Get Comments for Track (With User Context)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/v1/comments/track/{{trackId}}?userId={{userId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"comments",
+						"track",
+						"{{trackId}}"
+					],
+					"query": [
+						{
+							"key": "userId",
+							"value": "{{userId}}",
+							"description": "Optional: User ID to check if comments are liked by this user"
+						}
+					]
+				},
+				"description": "Get all comments for a track with user context. The is_liked field will reflect whether the specified user has liked each comment."
+			},
+			"response": []
+		},
+		{
+			"name": "Get Comments for Track (Paginated - First Page)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/v1/comments/track/{{trackId}}/page?limit=20",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"comments",
+						"track",
+						"{{trackId}}",
+						"page"
+					],
+					"query": [
+						{
+							"key": "limit",
+							"value": "20",
+							"description": "Number of comments per page (default 20, clamped to 1-100)"
+						}
+					]
+				},
+				"description": "Get paginated comments for a track. Only top-level comments are paginated; all replies for each top-level comment are included."
+			},
+			"response": []
+		},
+		{
+			"name": "Get Comments for Track (Paginated - Next Page)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/v1/comments/track/{{trackId}}/page?limit=20&cursor=<nextCursor>",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"comments",
+						"track",
+						"{{trackId}}",
+						"page"
+					],
+					"query": [
+						{
+							"key": "limit",
+							"value": "20",
+							"description": "Number of comments per page"
+						},
+						{
+							"key": "cursor",
+							"value": "<nextCursor>",
+							"description": "Cursor from previous page's nextCursor field"
+						}
+					]
+				},
+				"description": "Get next page of comments using cursor from previous response."
+			},
+			"response": []
+		},
+		{
+			"name": "Get Comments for Track (Paginated - With User Context)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/v1/comments/track/{{trackId}}/page?userId={{userId}}&limit=20",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"comments",
+						"track",
+						"{{trackId}}",
+						"page"
+					],
+					"query": [
+						{
+							"key": "userId",
+							"value": "{{userId}}",
+							"description": "Optional: User ID to check if comments are liked by this user"
+						},
+						{
+							"key": "limit",
+							"value": "20",
+							"description": "Number of comments per page"
+						}
+					]
+				},
+				"description": "Get paginated comments with user context. The is_liked field will reflect whether the specified user has liked each comment."
+			},
+			"response": []
+		},
+		{
+			"name": "Add Reaction (Like) to Comment",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"commentId\": \"789e4567-e89b-12d3-a456-426614174111\",\n  \"userId\": \"{{userId}}\",\n  \"reaction\": \"LIKE\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/v1/comments/reactions",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"comments",
+						"reactions"
+					]
+				},
+				"description": "Add a reaction (like) to a comment. The reaction field is optional and defaults to 'LIKE'."
+			},
+			"response": []
+		},
+		{
+			"name": "Remove Reaction (Unlike) from Comment",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/v1/comments/789e4567-e89b-12d3-a456-426614174111/reactions/{{userId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"comments",
+						"789e4567-e89b-12d3-a456-426614174111",
+						"reactions",
+						"{{userId}}"
+					]
+				},
+				"description": "Remove a reaction (unlike) from a comment. The likes_count in the comment will be automatically updated."
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Comment",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/v1/comments/{{commentId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"comments",
+						"{{commentId}}"
+					]
+				},
+				"description": "Delete a comment (soft delete). The comment status will be set to 'DELETED' and it will no longer appear in comment lists. If the comment has a parent, the parent's replies_count will be decremented."
+			},
+			"response": []
+		},
+		{
+			"name": "Error - Track Not Found",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"trackId\": \"00000000-0000-0000-0000-000000000000\",\n  \"userId\": \"{{userId}}\",\n  \"content\": \"This track doesn't exist\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/v1/comments",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"comments"
+					]
+				},
+				"description": "Example error case: trying to add a comment to a non-existent track. Should return 404 Not Found."
+			},
+			"response": []
+		},
+		{
+			"name": "Error - User Not Found",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"trackId\": \"{{trackId}}\",\n  \"userId\": \"00000000-0000-0000-0000-000000000000\",\n  \"content\": \"User doesn't exist\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/v1/comments",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"comments"
+					]
+				},
+				"description": "Example error case: trying to add a comment with a non-existent user. Should return 404 Not Found."
+			},
+			"response": []
+		},
+		{
+			"name": "Error - Invalid Parent Comment",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"trackId\": \"{{trackId}}\",\n  \"userId\": \"{{userId}}\",\n  \"content\": \"Trying to reply to non-existent parent\",\n  \"parentId\": \"00000000-0000-0000-0000-000000000000\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/v1/comments",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"comments"
+					]
+				},
+				"description": "Example error case: trying to reply to a non-existent parent comment. Should return 404 Not Found."
+			},
+			"response": []
+		},
+		{
+			"name": "Error - Comment Not Found (Reaction)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"commentId\": \"00000000-0000-0000-0000-000000000000\",\n  \"userId\": \"{{userId}}\",\n  \"reaction\": \"LIKE\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/v1/comments/reactions",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"comments",
+						"reactions"
+					]
+				},
+				"description": "Example error case: trying to add a reaction to a non-existent comment. Should return 404 Not Found."
+			},
+			"response": []
+		},
+		{
+			"name": "Error - Comment Not Found (Delete)",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/v1/comments/00000000-0000-0000-0000-000000000000",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"comments",
+						"00000000-0000-0000-0000-000000000000"
+					]
+				},
+				"description": "Example error case: trying to delete a non-existent comment. Should return 404 Not Found."
+			},
+			"response": []
+		},
+		{
+			"name": "Error - Comment Already Deleted",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/v1/comments/{{commentId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"comments",
+						"{{commentId}}"
+					]
+				},
+				"description": "Example error case: trying to delete a comment that is already deleted. Should return 400 Bad Request."
+			},
+			"response": []
+		}
+	]
+}
