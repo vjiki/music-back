@@ -1,0 +1,617 @@
+{
+	"info": {
+		"name": "Chats and Messages API",
+		"description": "Postman collection for testing Chats and Messages API endpoints",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "chatId",
+			"value": "550e8400-e29b-41d4-a716-446655440000",
+			"type": "string"
+		},
+		{
+			"key": "userId1",
+			"value": "123e4567-e89b-12d3-a456-426614174000",
+			"type": "string"
+		},
+		{
+			"key": "userId2",
+			"value": "456e7890-e89b-12d3-a456-426614174222",
+			"type": "string"
+		},
+		{
+			"key": "messageId",
+			"value": "789e4567-e89b-12d3-a456-426614174111",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "Chats",
+			"item": [
+				{
+					"name": "Get All Chats for User",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/chats/user/{{userId1}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"chats",
+								"user",
+								"{{userId1}}"
+							]
+						},
+						"description": "Get all chats for a user in Instagram-style format. Returns chat list with last message preview, participants, etc."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Chat by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/chats/{{chatId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"chats",
+								"{{chatId}}"
+							]
+						},
+						"description": "Get a single chat by ID with all participants."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Direct Chat",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"type\": \"DIRECT\",\n  \"participantIds\": [\n    \"{{userId1}}\",\n    \"{{userId2}}\"\n  ],\n  \"isEncrypted\": false\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/chats",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"chats"
+							]
+						},
+						"description": "Create a direct chat between two users."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Group Chat",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"type\": \"GROUP\",\n  \"title\": \"Music Lovers\",\n  \"description\": \"A group for music enthusiasts\",\n  \"avatarUrl\": \"https://example.com/group-avatar.jpg\",\n  \"ownerId\": \"{{userId1}}\",\n  \"participantIds\": [\n    \"{{userId1}}\",\n    \"{{userId2}}\",\n    \"789e1234-e89b-12d3-a456-426614174333\"\n  ],\n  \"isEncrypted\": false\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/chats",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"chats"
+							]
+						},
+						"description": "Create a group chat with multiple participants."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Chat",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/chats/{{chatId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"chats",
+								"{{chatId}}"
+							]
+						},
+						"description": "Delete a chat (hard delete). All participants and messages will be cascade deleted."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Messages",
+			"item": [
+				{
+					"name": "Get Messages in Chat (Non-Paginated)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/messages/chat/{{chatId}}?userId1={{userId1}}&userId2={{userId2}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"messages",
+								"chat",
+								"{{chatId}}"
+							],
+							"query": [
+								{
+									"key": "userId1",
+									"value": "{{userId1}}"
+								},
+								{
+									"key": "userId2",
+									"value": "{{userId2}}"
+								}
+							]
+						},
+						"description": "Get all messages in a chat between two users. Returns all messages in chronological order (oldest first)."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Messages in Chat (Paginated - First Page)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/messages/chat/{{chatId}}/page?limit=20",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"messages",
+								"chat",
+								"{{chatId}}",
+								"page"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "20",
+									"description": "Number of messages per page (default 20, clamped to 1-100)"
+								}
+							]
+						},
+						"description": "Get paginated messages in a chat. Only non-deleted messages are returned."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Messages in Chat (Paginated - Next Page)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/messages/chat/{{chatId}}/page?limit=20&cursor=<nextCursor>",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"messages",
+								"chat",
+								"{{chatId}}",
+								"page"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "20"
+								},
+								{
+									"key": "cursor",
+									"value": "<nextCursor>",
+									"description": "Cursor from previous page's nextCursor field"
+								}
+							]
+						},
+						"description": "Get next page of messages using cursor from previous response."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Text Message",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"chatId\": \"{{chatId}}\",\n  \"senderId\": \"{{userId1}}\",\n  \"content\": \"Hey, how are you?\",\n  \"messageType\": \"TEXT\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/messages",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"messages"
+							]
+						},
+						"description": "Create a new text message in a chat."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Reply Message",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"chatId\": \"{{chatId}}\",\n  \"senderId\": \"{{userId2}}\",\n  \"content\": \"I'm doing great, thanks!\",\n  \"replyToId\": \"{{messageId}}\",\n  \"messageType\": \"TEXT\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/messages",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"messages"
+							]
+						},
+						"description": "Create a reply to an existing message."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Message with Song",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"chatId\": \"{{chatId}}\",\n  \"senderId\": \"{{userId1}}\",\n  \"content\": \"Check out this song!\",\n  \"messageType\": \"SONG\",\n  \"songId\": \"6cf4bd03-cf16-4682-b867-ff038f5fe4d9\",\n  \"attachmentCount\": 0\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/messages",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"messages"
+							]
+						},
+						"description": "Create a message with a song attachment."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Message",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/messages/{{messageId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"messages",
+								"{{messageId}}"
+							]
+						},
+						"description": "Delete a message (soft delete). The message will be marked as deleted but not removed from the database."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Message Reactions",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/messages/{{messageId}}/reactions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"messages",
+								"{{messageId}}",
+								"reactions"
+							]
+						},
+						"description": "Get all reactions for a message."
+					},
+					"response": []
+				},
+				{
+					"name": "Add Reaction to Message",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"messageId\": \"{{messageId}}\",\n  \"userId\": \"{{userId2}}\",\n  \"emoji\": \"👍\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/messages/reactions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"messages",
+								"reactions"
+							]
+						},
+						"description": "Add a reaction (emoji) to a message."
+					},
+					"response": []
+				},
+				{
+					"name": "Remove Reaction from Message",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/messages/{{messageId}}/reactions/{{userId2}}/👍",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"messages",
+								"{{messageId}}",
+								"reactions",
+								"{{userId2}}",
+								"👍"
+							]
+						},
+						"description": "Remove a reaction from a message. Note: The emoji should be URL-encoded in the actual request."
+					},
+					"response": []
+				},
+				{
+					"name": "Mark Message as Read",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/messages/{{messageId}}/read/{{userId2}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"messages",
+								"{{messageId}}",
+								"read",
+								"{{userId2}}"
+							]
+						},
+						"description": "Mark a message as read. This also updates the participant's last_read_message_id in the chat."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Error Cases",
+			"item": [
+				{
+					"name": "Error - Chat Not Found",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/chats/00000000-0000-0000-0000-000000000000",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"chats",
+								"00000000-0000-0000-0000-000000000000"
+							]
+						},
+						"description": "Example error case: trying to get a non-existent chat. Should return 404 Not Found."
+					},
+					"response": []
+				},
+				{
+					"name": "Error - User Not Participant",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"chatId\": \"{{chatId}}\",\n  \"senderId\": \"00000000-0000-0000-0000-000000000000\",\n  \"content\": \"Trying to send message without being a participant\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/messages",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"messages"
+							]
+						},
+						"description": "Example error case: trying to send a message when user is not a participant. Should return 403 Forbidden."
+					},
+					"response": []
+				},
+				{
+					"name": "Error - Message Not Found",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/messages/00000000-0000-0000-0000-000000000000/reactions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"messages",
+								"00000000-0000-0000-0000-000000000000",
+								"reactions"
+							]
+						},
+						"description": "Example error case: trying to get reactions for a non-existent message. Should return 404 Not Found."
+					},
+					"response": []
+				},
+				{
+					"name": "Error - Invalid Reply-To Message",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"chatId\": \"{{chatId}}\",\n  \"senderId\": \"{{userId1}}\",\n  \"content\": \"Trying to reply to message from different chat\",\n  \"replyToId\": \"999e4567-e89b-12d3-a456-426614174999\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/messages",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"messages"
+							]
+						},
+						"description": "Example error case: trying to reply to a message that doesn't belong to the same chat. Should return 400 Bad Request."
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

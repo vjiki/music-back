@@ -6,16 +6,16 @@ import java.time.OffsetDateTime
 import java.util.*
 
 @Entity
-@Table(name = "track_comment_reaction", schema = "music")
-@IdClass(TrackCommentReactionId::class)
-data class TrackCommentReaction(
+@Table(name = "message_reactions", schema = "music")
+@IdClass(MessageReactionId::class)
+data class MessageReaction(
     @Id
-    @Column(name = "comment_id", nullable = false)
-    val commentId: UUID,
+    @Column(name = "message_id", nullable = false)
+    val messageId: UUID,
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "comment_id", insertable = false, updatable = false)
-    val comment: TrackComment? = null,
+    @JoinColumn(name = "message_id", insertable = false, updatable = false)
+    val message: Message? = null,
 
     @Id
     @Column(name = "user_id", nullable = false)
@@ -25,15 +25,17 @@ data class TrackCommentReaction(
     @JoinColumn(name = "user_id", insertable = false, updatable = false)
     val user: User? = null,
 
-    @Column(name = "reaction", nullable = false)
-    val reaction: String = "LIKE",
+    @Id
+    @Column(name = "emoji", nullable = false, length = 20)
+    val emoji: String,
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     val createdAt: OffsetDateTime? = null
 )
 
-data class TrackCommentReactionId(
-    val commentId: UUID = UUID(0, 0),
-    val userId: UUID = UUID(0, 0)
+data class MessageReactionId(
+    val messageId: UUID = UUID(0, 0),
+    val userId: UUID = UUID(0, 0),
+    val emoji: String = ""
 ) : java.io.Serializable

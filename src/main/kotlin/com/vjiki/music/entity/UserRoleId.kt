@@ -4,8 +4,8 @@ import java.io.Serializable
 import java.util.UUID
 
 data class UserRoleId(
-    val userId: UUID,
-    val role: String
+    val userId: UUID = UUID(0, 0),
+    val role: String = ""
 ) : Serializable
 
 

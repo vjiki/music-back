@@ -4,8 +4,8 @@ import java.io.Serializable
 import java.util.UUID
 
 data class TrackTagId(
-    val trackId: UUID,
-    val tagId: UUID
+    val trackId: UUID = UUID(0, 0),
+    val tagId: UUID = UUID(0, 0)
 ) : Serializable
 
 
