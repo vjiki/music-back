@@ -35,6 +35,7 @@ public class ChatParticipant {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role")
+    @Builder.Default
     private ParticipantRole role = ParticipantRole.MEMBER;
 
     @CreationTimestamp
@@ -42,6 +43,7 @@ public class ChatParticipant {
     private OffsetDateTime joinedAt;
 
     @Column(name = "is_muted", nullable = false)
+    @Builder.Default
     private Boolean isMuted = false;
 
     @Column(name = "last_read_message_id")

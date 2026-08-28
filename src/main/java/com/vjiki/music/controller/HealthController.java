@@ -1,11 +1,11 @@
 package com.vjiki.music.controller;
 
+import java.util.Map;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.Map;
 
 /**
  * Health check endpoint for Render.com and other monitoring services.
@@ -20,4 +20,3 @@ public class HealthController {
         return ResponseEntity.ok(Map.of("status", "UP"));
     }
 }
-

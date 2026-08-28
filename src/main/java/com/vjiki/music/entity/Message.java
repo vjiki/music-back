@@ -45,6 +45,7 @@ public class Message {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "message_type")
+    @Builder.Default
     private MessageType messageType = MessageType.TEXT;
 
     @Column(name = "content", columnDefinition = "TEXT")
@@ -58,12 +59,15 @@ public class Message {
     private Song song;
 
     @Column(name = "attachment_count")
+    @Builder.Default
     private Integer attachmentCount = 0;
 
     @Column(name = "is_edited", nullable = false)
+    @Builder.Default
     private Boolean isEdited = false;
 
     @Column(name = "is_deleted", nullable = false)
+    @Builder.Default
     private Boolean isDeleted = false;
 
     @Column(name = "deleted_at")

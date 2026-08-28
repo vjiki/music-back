@@ -30,6 +30,7 @@ public class Chat {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
+    @Builder.Default
     private ChatType type = ChatType.DIRECT;
 
     @Column(name = "title")
@@ -49,12 +50,15 @@ public class Chat {
     private User owner;
 
     @Column(name = "is_encrypted")
+    @Builder.Default
     private Boolean isEncrypted = false;
 
     @Column(name = "is_archived")
+    @Builder.Default
     private Boolean isArchived = false;
 
     @Column(name = "is_muted")
+    @Builder.Default
     private Boolean isMuted = false;
 
     @CreationTimestamp

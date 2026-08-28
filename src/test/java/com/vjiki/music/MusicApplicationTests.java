@@ -1,10 +1,10 @@
 package com.vjiki.music;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
-class MusicApplicationTests {
+import com.vjiki.music.support.AbstractIntegrationTest;
+
+class MusicApplicationTests extends AbstractIntegrationTest {
 
 	@Test
 	void contextLoads() {

@@ -1,13 +1,17 @@
 package com.vjiki.music.controller;
 
+import java.util.List;
+import java.util.UUID;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.vjiki.music.dto.PlaylistResponse;
 import com.vjiki.music.dto.PlaylistWithSongsResponse;
 import com.vjiki.music.service.PlaylistService;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/playlists")
@@ -21,14 +25,11 @@ public class PlaylistController {
 
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<PlaylistResponse>> getPlaylistsByUserId(@PathVariable UUID userId) {
-        List<PlaylistResponse> playlists = playlistService.getPlaylistsByUserId(userId);
-        return ResponseEntity.ok(playlists);
+        return ResponseEntity.ok(playlistService.getPlaylistsByUserId(userId));
     }
 
     @GetMapping("/{playlistId}")
     public ResponseEntity<PlaylistWithSongsResponse> getPlaylistWithSongs(@PathVariable UUID playlistId) {
-        PlaylistWithSongsResponse playlist = playlistService.getPlaylistWithSongs(playlistId);
-        return ResponseEntity.ok(playlist);
+        return ResponseEntity.ok(playlistService.getPlaylistWithSongs(playlistId));
     }
 }
-

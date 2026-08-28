@@ -1,10 +1,10 @@
 package com.vjiki.music.dto;
 
+import java.util.UUID;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.UUID;
 
 @Data
 @NoArgsConstructor
@@ -13,4 +13,3 @@ public class SongLikeRequest {
     private UUID userId;
     private UUID songId;
 }
-

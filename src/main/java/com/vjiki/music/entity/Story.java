@@ -37,6 +37,7 @@ public class Story {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "story_type", nullable = false)
+    @Builder.Default
     private StoryType storyType = StoryType.IMAGE;
 
     @Column(name = "song_id")
@@ -53,12 +54,15 @@ public class Story {
     private String location;
 
     @Column(name = "is_active", nullable = false)
+    @Builder.Default
     private Boolean isActive = true;
 
     @Column(name = "is_deleted", nullable = false)
+    @Builder.Default
     private Boolean isDeleted = false;
 
     @Column(name = "views_count", nullable = false)
+    @Builder.Default
     private Integer viewsCount = 0;
 
     @CreationTimestamp

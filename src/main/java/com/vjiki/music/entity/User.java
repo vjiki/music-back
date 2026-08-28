@@ -30,6 +30,7 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "provider", nullable = false)
+    @Builder.Default
     private AuthProvider provider = AuthProvider.LOCAL;
 
     @Column(name = "provider_id")
@@ -43,12 +44,15 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "access_level", nullable = false)
+    @Builder.Default
     private AccessLevel accessLevel = AccessLevel.USER;
 
     @Column(name = "is_active")
+    @Builder.Default
     private Boolean isActive = true;
 
     @Column(name = "is_verified")
+    @Builder.Default
     private Boolean isVerified = false;
 
     @Column(name = "last_login_at")

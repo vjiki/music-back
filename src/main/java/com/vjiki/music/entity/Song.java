@@ -38,6 +38,11 @@ public class Song {
     @Column(name = "cover_urls", nullable = false, columnDefinition = "jsonb")
     private Map<String, String> coverUrls;
 
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "video_urls", nullable = false, columnDefinition = "jsonb")
+    @Builder.Default
+    private Map<String, String> videoUrls = Map.of();
+
     @Column(name = "title", nullable = false)
     private String title;
 
@@ -70,5 +75,9 @@ public class Song {
     @Column(name = "active", nullable = false)
     @Builder.Default
     private Boolean active = false;
+
+    @Column(name = "type", nullable = false)
+    @Builder.Default
+    private String type = "SONG";
 }
 

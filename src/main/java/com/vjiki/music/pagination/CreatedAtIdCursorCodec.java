@@ -1,0 +1,60 @@
+package com.vjiki.music.pagination;
+
+import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.Base64;
+import java.util.UUID;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
+
+/**
+ * Opaque cursor for keyset pagination: (createdAtEpochMillis, id).
+ *
+ * Encoded as base64url (no padding) of: "&lt;epochMillis&gt;:&lt;uuid&gt;"
+ */
+public final class CreatedAtIdCursorCodec {
+
+    private CreatedAtIdCursorCodec() {
+    }
+
+    public record Cursor(OffsetDateTime createdAt, UUID id) {
+    }
+
+    public static String encode(OffsetDateTime createdAt, UUID id) {
+        String raw = createdAt.toInstant().toEpochMilli() + ":" + id;
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(raw.getBytes(StandardCharsets.UTF_8));
+    }
+
+    public static Cursor decodeOrNull(String cursor) {
+        if (cursor == null || cursor.isBlank()) {
+            return null;
+        }
+        try {
+            String decoded = new String(Base64.getUrlDecoder().decode(cursor), StandardCharsets.UTF_8);
+            String[] parts = decoded.split(":", 2);
+            if (parts.length != 2) {
+                return null;
+            }
+            long epochMillis = Long.parseLong(parts[0]);
+            UUID id = UUID.fromString(parts[1]);
+            OffsetDateTime createdAt = OffsetDateTime.ofInstant(Instant.ofEpochMilli(epochMillis), ZoneOffset.UTC);
+            return new Cursor(createdAt, id);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public static Cursor decodeOrBadRequest(String cursor) {
+        if (cursor == null || cursor.isBlank()) {
+            return null;
+        }
+        Cursor parsed = decodeOrNull(cursor);
+        if (parsed == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid cursor");
+        }
+        return parsed;
+    }
+}

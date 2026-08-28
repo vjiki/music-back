@@ -1,12 +1,16 @@
 package com.vjiki.music.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * Instagram-style chat list item response
@@ -15,6 +19,7 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class ChatListItemResponse {
     private UUID chatId;
     private String chatType;
@@ -25,8 +30,12 @@ public class ChatListItemResponse {
     private UUID lastMessageSenderId;
     private String lastMessageSenderName;
     private Integer unreadCount;
-    private Boolean isMuted;
-    private OffsetDateTime updatedAt;
-    private List<ParticipantSummaryResponse> participants;
-}
 
+    @JsonProperty("isMuted")
+    private Boolean isMuted;
+
+    private OffsetDateTime updatedAt;
+
+    @Builder.Default
+    private List<ParticipantSummaryResponse> participants = new ArrayList<>();
+}
